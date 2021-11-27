@@ -34,7 +34,7 @@ exp: exp PLUS exp {$$=mknode("+",$1,$3);}
 int  main (){
 return yyparse();
 }
-int yyerror(){printf("error");return 0;}
+int yyerror(const char *s){printf("error");return 0;}
 int yywrap(){return 1;}
 
 node *mknode(char *token,node *left,node *right)
