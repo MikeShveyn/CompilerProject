@@ -65,42 +65,41 @@ extern int yydebug;
     FOR = 271,
     VAR = 272,
     RETURN = 273,
-    FUNCTION = 274,
-    AND = 275,
-    DIVISION = 276,
-    ASSIGNMENT = 277,
-    EQL = 278,
-    GREATER = 279,
-    GREATER_EQL = 280,
-    LESS = 281,
-    LESS_EQL = 282,
-    MINUS = 283,
-    NOT = 284,
-    NOT_EQL = 285,
-    OR = 286,
-    PLUS = 287,
-    MULTIPLY = 288,
-    ADDRESS = 289,
-    LENGTH = 290,
-    SEMICOLON = 291,
-    COLON = 292,
-    COMMA = 293,
-    OPEN_CURLY_BRACES = 294,
-    CLOSE_CURLY_BRACES = 295,
-    OPEN_ANGLE_BRACES = 296,
-    CLOSE_ANGLE_BRACES = 297,
-    OPEN_SQUARE_BRACES = 298,
-    CLOSE_SQUARE_BRACES = 299,
-    COMMENT = 300,
-    NONE = 301,
-    BOOL_TRUE = 302,
-    BOOL_FALSE = 303,
-    CHAR_LITERAL = 304,
-    STRING_LITERAL = 305,
-    DECIMAL_LITERAL = 306,
-    HEX_LITERAL = 307,
-    REAL_LITERAL = 308,
-    VARIABLE_ID = 309
+    AND = 274,
+    DIVISION = 275,
+    ASSIGNMENT = 276,
+    EQL = 277,
+    GREATER = 278,
+    GREATER_EQL = 279,
+    LESS = 280,
+    LESS_EQL = 281,
+    MINUS = 282,
+    NOT = 283,
+    NOT_EQL = 284,
+    OR = 285,
+    PLUS = 286,
+    MULTIPLY = 287,
+    ADDRESS = 288,
+    LENGTH = 289,
+    SEMICOLON = 290,
+    COLON = 291,
+    COMMA = 292,
+    OPEN_CURLY_BRACES = 293,
+    CLOSE_CURLY_BRACES = 294,
+    OPEN_ANGLE_BRACES = 295,
+    CLOSE_ANGLE_BRACES = 296,
+    OPEN_SQUARE_BRACES = 297,
+    CLOSE_SQUARE_BRACES = 298,
+    COMMENT = 299,
+    NONE = 300,
+    BOOL_TRUE = 301,
+    BOOL_FALSE = 302,
+    CHAR_LITERAL = 303,
+    STRING_LITERAL = 304,
+    DECIMAL_LITERAL = 305,
+    HEX_LITERAL = 306,
+    REAL_LITERAL = 307,
+    VARIABLE_ID = 308
   };
 #endif
 /* Tokens.  */
@@ -120,42 +119,41 @@ extern int yydebug;
 #define FOR 271
 #define VAR 272
 #define RETURN 273
-#define FUNCTION 274
-#define AND 275
-#define DIVISION 276
-#define ASSIGNMENT 277
-#define EQL 278
-#define GREATER 279
-#define GREATER_EQL 280
-#define LESS 281
-#define LESS_EQL 282
-#define MINUS 283
-#define NOT 284
-#define NOT_EQL 285
-#define OR 286
-#define PLUS 287
-#define MULTIPLY 288
-#define ADDRESS 289
-#define LENGTH 290
-#define SEMICOLON 291
-#define COLON 292
-#define COMMA 293
-#define OPEN_CURLY_BRACES 294
-#define CLOSE_CURLY_BRACES 295
-#define OPEN_ANGLE_BRACES 296
-#define CLOSE_ANGLE_BRACES 297
-#define OPEN_SQUARE_BRACES 298
-#define CLOSE_SQUARE_BRACES 299
-#define COMMENT 300
-#define NONE 301
-#define BOOL_TRUE 302
-#define BOOL_FALSE 303
-#define CHAR_LITERAL 304
-#define STRING_LITERAL 305
-#define DECIMAL_LITERAL 306
-#define HEX_LITERAL 307
-#define REAL_LITERAL 308
-#define VARIABLE_ID 309
+#define AND 274
+#define DIVISION 275
+#define ASSIGNMENT 276
+#define EQL 277
+#define GREATER 278
+#define GREATER_EQL 279
+#define LESS 280
+#define LESS_EQL 281
+#define MINUS 282
+#define NOT 283
+#define NOT_EQL 284
+#define OR 285
+#define PLUS 286
+#define MULTIPLY 287
+#define ADDRESS 288
+#define LENGTH 289
+#define SEMICOLON 290
+#define COLON 291
+#define COMMA 292
+#define OPEN_CURLY_BRACES 293
+#define CLOSE_CURLY_BRACES 294
+#define OPEN_ANGLE_BRACES 295
+#define CLOSE_ANGLE_BRACES 296
+#define OPEN_SQUARE_BRACES 297
+#define CLOSE_SQUARE_BRACES 298
+#define COMMENT 299
+#define NONE 300
+#define BOOL_TRUE 301
+#define BOOL_FALSE 302
+#define CHAR_LITERAL 303
+#define STRING_LITERAL 304
+#define DECIMAL_LITERAL 305
+#define HEX_LITERAL 306
+#define REAL_LITERAL 307
+#define VARIABLE_ID 308
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -165,7 +163,7 @@ union YYSTYPE
 
     char *str;
 
-#line 169 "y.tab.h"
+#line 167 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

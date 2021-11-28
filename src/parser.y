@@ -31,27 +31,104 @@
 %left SEMICOLON COMMA
 %right NOT ADDRESS ASSIGNMENT 
 
+
+/*  !!! TODO ADD POINTERS AND THIK ABOUT UNARY OPERATORS  STRINGS  !!! */
+/*  !!! ADD NODES AND PRINTS   !!! */
+
 %%
 s: function {printf("Ok\n");}
-function : returnType VARIABLE_ID OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES ;
-returnType : type | VOID ;
-type : BOOL | CHAR | CHAR_P | INT | INT_P | REAL | REAL_P | STRING ;
-parameter_list : argument SEMICOLON parameter_list | argument | nothing ;
+ /* FUNCTION  */
+function :
+	   type VARIABLE_ID OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES 
+	 | VOID VARIABLE_ID OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES 
+	 ;
+
+parameter_list :
+	   argument SEMICOLON parameter_list 
+	 | argument 
+	 | nothing 
+	 ;
+
 argument : type atributeList ;
-atributeList : VARIABLE_ID COMMA atributeList | VARIABLE_ID ;
-nothing : ;
-body : nested_declarations nested_statments | nested_declarations | nested_statments | nothing ;
-nested_declarations : declaration nested_declarations| declaration ;
-declaration : function | variable_declaration ;
-variable_declaration : VAR type variableL ;
-variableL : VARIABLE_ID COMMA variableL| VARIABLE_ID ASSIGNMENT exp  COMMA variableL | VARIABLE_ID ASSIGNMENT exp SEMICOLON | VARIABLE_ID SEMICOLON ; 
-nested_statments : statment nested_statments | statment ;
-statment: function_call SEMICOLON | assignment_statement SEMICOLON | RETURN SEMICOLON | conditions | code_block ;
-code_block:
-conditions:
-assignment_statement: lhs  ASSIGNMENT expressions | VARIABLE_ID  ASSIGNMENT STRING_LITERAL ;
-lhs: VARIABLE_ID | VARIABLE_ID OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES |
+
+atributeList :
+	  VARIABLE_ID COMMA atributeList 
+	| VARIABLE_ID 
+	;
+
+body : 
+	  nested_declarations nested_statments 
+	| nested_declarations 
+	| nested_statments 
+	| nothing 
+	;
+
+
 function_call: VARIABLE_ID OPEN_ANGLE_BRACES expressions  CLOSE_ANGLE_BRACES ;
+
+ /* Declarations  */
+nested_declarations :
+	   declaration nested_declarations
+	 | declaration 
+	 ;
+
+declaration :
+	     function 
+	   | variable_declaration 
+	   ;
+	   
+variable_declaration : VAR type variableL ;
+
+variableL : 
+	     VARIABLE_ID COMMA variableL
+	   | VARIABLE_ID ASSIGNMENT exp  COMMA variableL 
+	   | VARIABLE_ID ASSIGNMENT exp SEMICOLON 
+	   | VARIABLE_ID SEMICOLON 
+	   ; 
+
+/* Statments */
+nested_statments : 
+	     statment nested_statments 
+	   | statment 
+	   ;
+
+statment: 
+	     function_call SEMICOLON 
+	   | assignment_statement SEMICOLON 
+	   | return 
+	   | conditions 
+	   | loops 
+	   | code_block ;
+
+code_block:
+	     OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES 
+	   | OPEN_CURLY_BRACES code_block CLOSE_CURLY_BRACES;
+
+conditions: 
+	  IF OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES 
+	| IF OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES ELSE OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES 
+	;
+
+loops :
+	  WHILE OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body CLOSE_ANGLE_BRACES SEMICOLON
+	| DO OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES WHILE OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES SEMICOLON
+	| FOR OPEN_ANGLE_BRACES init SEMICOLON exp SEMICOLON update CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES
+	;  
+
+assignment_statement:
+	   lhs  ASSIGNMENT expressions SEMICOLON
+	 | lhs  ASSIGNMENT STRING_LITERAL SEMICOLON
+	 ;
+
+lhs :
+	   VARIABLE_ID 
+	 | VARIABLE_ID OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES
+	 ; 
+init : INT VARIABLE_ID ASSIGNMENT DECIMAL_LITERAL | INT VARIABLE_ID ASSIGNMENT HEX_LITERAL ;
+update : INT VARIABLE_ID ASSIGNMENT exp ; 
+return : RETURN exp SEMICOLON;
+
+ /* Expression */
 expressions : exp COMMA expressions | exp | nothing ;
 exp : 
 	  exp PLUS exp            			
@@ -76,7 +153,12 @@ exp :
 	| ADDRESS VARIABLE_ID OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES									
 	;
 
+
+ /* TYPES */
+type : BOOL | CHAR | CHAR_P | INT | INT_P | REAL | REAL_P | STRING ;
 primitiveType : NONE | BOOL_TRUE | BOOL_FALSE | CHAR_LITERAL | DECIMAL_LITERAL | HEX_LITERAL| REAL_LITERAL ;
+nothing : ;
+
 
 %%
 
