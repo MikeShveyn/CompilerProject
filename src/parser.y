@@ -41,7 +41,7 @@
 // NODES FUNCTIONS 
 %type<node> program code function exp expressions parameter_list body_func body return  primitiveType argument nothing statment_func declaration
 %type<node> nested_declarations nested_statments nested_statments_func type code_block function_call assignment_statement conditions loops lhs statment
-%type<node> init, update
+%type<node> init update forPrimitiveType variable_declaration variableL atributeList
 
 
 
@@ -53,9 +53,7 @@
 %right NOT ADDRESS ASSIGNMENT 
 
 
-/*  !!! TODO ADD POINTERS AND THIK ABOUT UNARY OPERATORS  STRINGS  !!! */
-/* HOW TO CHECK RETURN STATMENT IN VOID  */
-/*  !!! ADD NODES AND PRINTS   !!! */
+/*  !!! TODO ADD POINTERS AND THIK ABOUT UNARY OPERATORS  STRINGS  ARRAYS COMMENTS !!! */
 
 %%
 program: code { printf("OK\n");  Printtree($1);};
@@ -73,19 +71,22 @@ function:
 	   }
 	 
 	 | VOID VARIABLE_ID OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES 
+		{
+			 $$=mknode("FUNC", mknode($2,mknode("\n",NULL,NULL), mknode("",mknode("ARGS",$4, NULL) ,mknode("RET-VOID",NULL, NULL))), mknode("BODY",$7,NULL));
+		}
 	 ;
 
 parameter_list:
-	  argument SEMICOLON parameter_list  {$$=NULL;}
-	| argument 
-	| nothing {$$=NULL;}
+	  argument SEMICOLON parameter_list  {$$=mknode("",$1,$3);}
+	| argument  {$$=mknode("",$1,NULL);}
+	| nothing {$$=mknode("",$1,NULL);}
 	 ;
 
-argument: type atributeList ;
+argument: type atributeList {$$=mknode("ARG-TYPE",$1,$2);};
 
 atributeList:
-	  VARIABLE_ID COMMA atributeList 
-	| VARIABLE_ID 
+	  VARIABLE_ID COMMA atributeList {$$=mknode($1,$3,NULL);};
+	| VARIABLE_ID {$$=mknode($1,NULL,NULL);};
 	;
 
 body: 
@@ -116,7 +117,7 @@ statment_func:
 	   ;
 
 
-function_call: VARIABLE_ID OPEN_ANGLE_BRACES expressions  CLOSE_ANGLE_BRACES SEMICOLON {$$=mknode("FUNCTION_CALL",$1,$3);};
+function_call: lhs OPEN_ANGLE_BRACES expressions  CLOSE_ANGLE_BRACES SEMICOLON {$$=mknode("FUNCTION_CALL",$1,$3);};
 
  /* Declarations  */
 nested_declarations:
@@ -125,17 +126,17 @@ nested_declarations:
 	 ;
 
 declaration:
-	     function {$$=NULL;}
-	   | variable_declaration {$$=NULL;}
+	     function { $$ = mknode("",$1, NULL); }
+	   | variable_declaration { $$ = mknode("",$1, NULL); }
 	   ;
 	   
-variable_declaration: VAR type variableL ;
+variable_declaration: VAR type variableL { $$ = mknode("VAR",$2, $3); }
 
 variableL: 
-	     VARIABLE_ID COMMA variableL
-	   | VARIABLE_ID ASSIGNMENT exp  COMMA variableL 
-	   | VARIABLE_ID ASSIGNMENT exp SEMICOLON 
-	   | VARIABLE_ID SEMICOLON 
+	     lhs COMMA variableL { $$ = mknode("",$1, $3); }
+	   | lhs ASSIGNMENT exp  COMMA variableL { $$ = mknode("=",$1, mknode("",$3, mknode("",$5,NULL))); }
+	   | lhs ASSIGNMENT exp SEMICOLON { $$ = mknode("=",$1, $3); }
+	   | lhs SEMICOLON { $$ = mknode("",$1, NULL); }
 	   ; 
 
 /* Statments */
@@ -175,11 +176,10 @@ lhs:
 	 | VARIABLE_ID OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode($1,$3,NULL);}
 	 ;
 
-init:
-	 VARIABLE_ID ASSIGNMENT DECIMAL_LITERAL {$$=mknode("=",$1,$3);}
-	| VARIABLE_ID ASSIGNMENT HEX_LITERAL {$$=mknode("=",$1,$3);}
-	;
-update: VARIABLE_ID ASSIGNMENT exp {$$=mknode("=",$1,$3);};
+init:  lhs ASSIGNMENT forPrimitiveType {$$=mknode("=",$1,$3);};
+	
+update: lhs ASSIGNMENT exp {$$=mknode("=",$1,$3);};
+
 return: RETURN exp SEMICOLON {$$=mknode("RET",$2,NULL);} ; 
 
  /* Expression */
@@ -236,6 +236,12 @@ primitiveType:
 	 | REAL_LITERAL  {$$=mknode("REAL_LITERAL",NULL,NULL);} 
 	 | STRING_LITERAL {$$=mknode("STRING_LITERAL",NULL,NULL);} 
 	 ;
+
+forPrimitiveType:
+	   DECIMAL_LITERAL  {$$=mknode("DECIMAL_LITERAL",NULL,NULL);} 
+	 | HEX_LITERAL {$$=mknode("HEX_LITERAL",NULL,NULL);} 
+	 ;
+
 nothing:  {$$=NULL;}; 
 
 
@@ -270,7 +276,7 @@ void Printtree(node* tree)
 	if(strcmp(tree->token, "VAR") == 0)
 	{
 		
-		printf("(DECLARE ");
+		printf("(VAR ");
 		flag=2;
 		
 		
@@ -323,6 +329,11 @@ void Printtree(node* tree)
 	
 
 	}
+		else if(strcmp(tree->token, "ARG-TYPE") == 0)
+	{
+		printf("(");
+		flag =2 ;
+	}
 	else if(strcmp(tree->token, "IF-ELSE") == 0)
 	{
 		printf("(IF-ELSE\n");
@@ -340,6 +351,11 @@ void Printtree(node* tree)
 		else{
 			printf(" NONE)\n"); 
 		}
+	}
+	else if(strcmp(tree->token, "RET-VOID") == 0)
+	{
+		printf("(RET VOID");
+		flag = 2;
 	}
 
 	else if(strcmp(tree->token, "BODY") == 0)
