@@ -1,6 +1,4 @@
-void foo(){
-
-/% Yes %/
-   
-}
+char goo(){
+     return a;
+}    
 
