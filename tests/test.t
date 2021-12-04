@@ -1,4 +1,6 @@
-char goo(){
-     return a;
-}    
+void foo(){
+
+/% Yes %/
+   
+}
 
