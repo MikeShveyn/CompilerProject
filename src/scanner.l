@@ -59,8 +59,8 @@ return {return RETURN;}
 
   /*Literl*/
 null {return NONE;}  
-"true" {return BOOL_TRUE;}
-"false" {return BOOL_FALSE;}
+true {return BOOL_TRUE;}
+false {return BOOL_FALSE;}
 \'.\' {yylval.str= strdup(yytext); return CHAR_LITERAL;}
 "\""[^"]*"\"" {yylval.str = strdup(yytext); return STRING_LITERAL;}
 [+-]?[1-9][0-9]*|[0-9] {yylval.str= strdup(yytext); return DECIMAL_LITERAL;}

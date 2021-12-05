@@ -1,6 +1,7 @@
-void checkpointers(){
+void checkStmt(){
+    y = x + y + z;
+    x = f*2;
+    z = f;
 
-    string y[10];
-    y = &x;
-    x = &y[5]; 
+ 
 }

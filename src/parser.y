@@ -53,7 +53,7 @@
 /*  !!! TODO ADD POINTERS AND THIK ABOUT UNARY OPERATORS  STRINGS  ARRAYS COMMENTS !!! */
 
 %%
-program: code { printf("CODE\n");  TreePrint($1);};
+program: code { TreePrint($1);};
 
 code:
 	   function code  { $$ = mknode("",$1, $2); }
@@ -165,7 +165,7 @@ conditions:
 
 loops:
 	  WHILE OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block {$$=mknode("WHILE",$3,$5);}
-	| DO code_block WHILE OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES SEMICOLON{$$=mknode("D0-WHILE",$2,$5);}
+	| DO code_block WHILE OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES SEMICOLON{$$=mknode("DO-WHILE",$2,$5);}
 	| FOR OPEN_ANGLE_BRACES init SEMICOLON exp SEMICOLON update CLOSE_ANGLE_BRACES code_block {$$=mknode("FOR",mknode("INIT", $3, mknode("COND", $5, mknode("UPDATE",$7, NULL))),$9);}
 	;  
 
@@ -203,7 +203,7 @@ exp:
     | exp OR exp {$$=mknode("||",$1,$3);}
 	| exp AND exp {$$=mknode("&&",$1,$3);}												
 	| primitiveType {$$=mknode("",$1, NULL);} 			
-	| NOT exp {$$=mknode("!",$1,NULL);} 								
+	| NOT exp {$$=mknode("!",$2,NULL);} 								
 	| VARIABLE_ID {$$=mknode($1,NULL,NULL);}											
 	| function_call {$$=mknode($1,NULL,NULL);}	  							
 	| LENGTH VARIABLE_ID LENGTH {$$=mknode($2,NULL,NULL);}	 									
@@ -235,9 +235,9 @@ type:
 	;
 
 primitiveType: 
-	 NONE {$$=mknode($1,NULL,NULL);} 
-	 |BOOL_TRUE {$$=mknode($1,NULL,NULL);} 
-	 |BOOL_FALSE  {$$=mknode($1,NULL,NULL);} 
+	 NONE {$$=mknode("None",NULL,NULL);} 
+	 |BOOL_TRUE {$$=mknode("True",NULL,NULL);} 
+	 |BOOL_FALSE  {$$=mknode("False",NULL,NULL);} 
 	 | CHAR_LITERAL {$$=mknode($1,NULL,NULL);} 
 	 | DECIMAL_LITERAL  {$$=mknode($1,NULL,NULL);} 
 	 | HEX_LITERAL {$$=mknode($1,NULL,NULL);} 
@@ -263,184 +263,187 @@ int main()
 
 void TreePrint(node* tree)
 {
-	printTabs(printlevel); 
-	if(strcmp(tree->token, "VAR") == 0)
-	{
-		
-		printf("(VAR ");	
-	}
-	else if(strcmp(tree->token, "IF") == 0)
-	{
-		printf("(IF\n");	
-	}
-	else if(strcmp(tree->token, "WHILE") == 0)
-	{
-		printf("(WHILE\n");	
-	}
-	else if(strcmp(tree->token, "DO-WHILE") == 0)
-	{
-		printf("(DO-WHILE\n");	
-	}
-	else if(strcmp(tree->token, "FOR") == 0)
-	{
-		printf("(FOR\n");	
-	}
-	else if(strcmp(tree->token, "FUNC") == 0 || strcmp(tree->token, "CODE") == 0 || strcmp(tree->token, "FUNCTION_CALL") == 0)
-	{
+	char endings[3][3] ={")","\n)",")\n"};
+	char end[3] = "";
+	/* CONDITIONS */
+	if(strcmp(tree->token, "IF") == 0){
 		printf("(%s \n",tree->token);
-		flag= 2;
+		memcpy(end, endings[2], strlen(endings[2]));	
 		
 	}
-	else if(strcmp(tree->token, "ARGS") == 0)
-	{
-		printf("(ARGS ");
-		if(tree->left)
-		{
-			flag = 2;
+
+	else if(strcmp(tree->token, "WHILE") == 0){
+		printf("(%s \n",tree->token);	
+		memcpy(end, endings[1], strlen(endings[1]));	
+	}
+
+	else if(strcmp(tree->token, "DO-WHILE") == 0){
+		printf("(%s \n",tree->token);
+		memcpy(end, endings[2], strlen(endings[2]));			
+	}		
+
+	else if(strcmp(tree->token, "FOR") == 0){
+		printf("(%s \n",tree->token);
+		memcpy(end, endings[1], strlen(endings[1]));			
+	}		
+
+	else if(strcmp(tree->token, "IF-ELSE") == 0){
+		printf("(%s \n",tree->token);
+		memcpy(end, endings[1], strlen(endings[1]));			
+	}	
+
+	else if(strcmp(tree->token, "INIT") == 0){
+		printf("(%s \n",tree->token);
+		memcpy(end, endings[1], strlen(endings[1]));			
+	}
+
+	else if(strcmp(tree->token, "UPDATE") == 0){
+		printf("(%s \n",tree->token);
+		memcpy(end, endings[1], strlen(endings[1]));			
+	}
+
+	else if(strcmp(tree->token, "COND") == 0){
+	printf("\n(%s",tree->token);
+	memcpy(end, endings[1], strlen(endings[1]));			
+	}		
+
+	/* FUNCTIONS */
+	else if(strcmp(tree->token, "CODE") == 0){
+			printf("(%s \n",tree->token);
+			memcpy(end, endings[1], strlen(endings[1]));			
+		}			
+
+	else if(strcmp(tree->token, "FUNC") == 0){
+		printf("(%s \n",tree->token);	
+		memcpy(end, endings[1], strlen(endings[1]));				
+	}	
+
+	else if(strcmp(tree->token, "FUNCTION_CALL") == 0){
+		printf("(%s \n",tree->token);	
+		memcpy(end, endings[1], strlen(endings[1]));				
+	}		
+
+	else if(strcmp(tree->token, "BODY") == 0){
+		printf("(%s ",tree->token);	
+		if(tree->left->left){
+			memcpy(end, endings[1], strlen(endings[1]));	
 			printf("\n");
-			
+		}
+		else{
+			printf(" NONE)\n"); 
+		}		
+	}	
+
+	else if(strcmp(tree->token, "CODE_BLOCK") == 0){
+		printf("\n(%s \n",tree->token);
+		memcpy(end, endings[1], strlen(endings[1]));				
+	}	
+
+	else if(strcmp(tree->token, "ARGS") == 0){
+		printf("(%s ",tree->token);	
+		if(tree->left->left){
+			memcpy(end, endings[1], strlen(endings[2]));	
+			printf("\n");
 		}
 		else{
 			printf(" NONE)\n"); 
 		}
-	
-
 	}
-		else if(strcmp(tree->token, "ARG-TYPE") == 0)
-	{
+
+	else if(strcmp(tree->token, "ARG-TYPE") == 0){
+		printf("( ");	
+		memcpy(end, endings[0], strlen(endings[0]));	
+	}
+
+	else if(strcmp(tree->token, "RET-VOID") == 0){
+		printf("\n(%s)\n",tree->token);	
+	}
+
+	else if(strcmp(tree->token, "RET") == 0){
+		printf("\n(%s ",tree->token);
+		if(tree->left){
+			memcpy(end, endings[2], strlen(endings[2]));
+		}
+		else{
+			printf(" NONE)\n"); 
+		}	
+	}	
+
+	/* DECALRATION */
+	else if(strcmp(tree->token, "VAR") == 0){
+		printf("(%s ",tree->token);	
+		memcpy(end, endings[0], strlen(endings[0]));
+	}	
+
+	else if(strcmp(tree->token, "ADDRESS-OF") == 0){
+		printf("(%s \n",tree->token);	
+		memcpy(end, endings[1], strlen(endings[1]));
+	}	
+			
+	else if(strcmp(tree->token, "STRING") == 0){
 		printf("(");
-		flag =2 ;
-	}
-	else if(strcmp(tree->token, "IF-ELSE") == 0)
-	{
-		printf("(IF-ELSE\n");
-		printlevel--;
-		flag = 1;
-	}
-	else if(strcmp(tree->token, "RET") == 0)
-	{
-		printf("(RET ");
-		if(tree->left)
-		{
-			flag = 2;
-			
-		}
-		else{
-			printf(" NONE)\n"); 
-		}
-	}
-	else if(strcmp(tree->token, "RET-VOID") == 0)
-	{
-		printf("(RET VOID");
-		flag = 2;
-	}
+		memcpy(end, endings[0], strlen(endings[0]));
+	}						
 
-	else if(strcmp(tree->token, "BODY") == 0)
-	{
-		printf("(BODY ");
-		if(tree->left || tree->right)
-		{
-			flag = 2;
-			printf("\n");
-		}
-		else{
-			printf(" NONE)\n"); 
-		}
-	}
-
-	else if(strcmp(tree->token, "CODE_BLOCK") == 0)
-	{
-		printf("(CODE_BLOCK\n");
-		flag = 2;
-				
-	}
-
-	else if(strcmp(tree->token, "STRING") == 0)
-	{
+	/* LEXICAL */
+	else if(strcmp(tree->token, "(") == 0){
 		printf("(");
-		flag = 2;
-				
 	}
 
-		else if(strcmp(tree->token, "ADDRESS-OF") == 0)
-	{
-		printf("(ADDRESS-OF\n");
-		flag = 2;
-				
+	else if(strcmp(tree->token, "\n") == 0){
+		printf("\n");
 	}
 
-	else if(strcmp(tree->token, "") == 0);
-	else if(strcmp(tree->token, "(") == 0)
-			printf("(");
-	else if(strcmp(tree->token, "\n") == 0)
-			printf("\n");
-	else if(strcmp(tree->token, ")") == 0)
-			printf(")\n");
-	else if(strcmp(tree->token, ",") == 0)
-			printf(",");
-	else if(strcmp(tree->token, ";") == 0)
-			printf("\n");
-	else if(strcmp(tree->token, "&&") == 0 ||
-strcmp(tree->token, "/") == 0 || 
-strcmp(tree->token, "=") == 0 || 
-strcmp(tree->token, "==") == 0 || 
-strcmp(tree->token, ">") == 0 || 
-strcmp(tree->token, ">=") == 0 || 
-strcmp(tree->token, "<") == 0 || 
-strcmp(tree->token, "<=") == 0 || 
-strcmp(tree->token, "-") == 0 || 
-strcmp(tree->token, "!") == 0 || 
-strcmp(tree->token, "!=") == 0 || 
-strcmp(tree->token, "||") == 0 || 
-strcmp(tree->token, "+") == 0 || 
-strcmp(tree->token, "*") == 0 || 
-strcmp(tree->token, "&") == 0 || 
-strcmp(tree->token, "^") == 0 || 
-strcmp(tree->token, "|") == 0 || 
-strcmp(tree->token, ",") == 0 )
-	{
-			printf("(%s",tree->token);
-			flag=1;
-			if(strcmp(tree->token, "=") == 0)
-				flag=2;		
-	}
-	else
-	{
-		if(tree && (!tree->left && !tree->right)
-		||strcmp(tree->token, "Main") == 0)
-		{
-			printf("%s", tree->token);
-			
-		}
-		else
-		{
-			printlevel++;
-			printf("%s", tree->token);
-			printlevel--;
-		
-		}
-	}
-	if (tree->left) 
-	{
-		printlevel++;
-	 TreePrint(tree->left);
-		printlevel--;
-	}
-	
-	if (tree->right)
-	{
-		printlevel++;
-	 TreePrint(tree->right);
-		printlevel--;
-		
-	}
-	if(flag == 2)
+	else if(strcmp(tree->token, ")") == 0){
 		printf(")\n");
+	}	
+
+	else if(strcmp(tree->token, ",") == 0){
+		printf(",");
+	}
+
+	else if(strcmp(tree->token, ";") == 0){
+		printf(";");
+	}
+
+
+	else if(strcmp(tree->token, "&&") == 0 || strcmp(tree->token, "/") == 0 || strcmp(tree->token, "==") == 0 ||
+		strcmp(tree->token, ">") == 0 || strcmp(tree->token, ">=") == 0 || 
+	strcmp(tree->token, "<") == 0 || strcmp(tree->token, "<=") == 0 || strcmp(tree->token, "-") == 0 || 
+	strcmp(tree->token, "!") == 0 || strcmp(tree->token, "!=") == 0 || strcmp(tree->token, "||") == 0 || 
+	strcmp(tree->token, "+") == 0 || strcmp(tree->token, "*") == 0 || strcmp(tree->token, "&") == 0 || 
+	strcmp(tree->token, "^") == 0 || strcmp(tree->token, "|") == 0 || strcmp(tree->token, ",") == 0 ){
+
+		printf("\n(%s", tree->token);
+		memcpy(end, endings[2], strlen(endings[2]));
+	}
+
+	else if(strcmp(tree->token, "=") == 0) {
+		printf("(%s ", tree->token);
+		memcpy(end, endings[2], strlen(endings[2]));
+	}
+
+
+	else{
+		if(tree && (!tree->left && !tree->right)){
+			printf("%s", tree->token);
+		}
+		else{
+			printf("%s", tree->token);
+		}
+	}
+
+	/* POST ORDER CALLS  */
+
+	if (tree->left) {
+	 TreePrint(tree->left);
+	}
 	
-	if(flag == 1)
-		printf(")");
-	if(flag == 0)
-		printf("\n)");
+	if (tree->right){
+	 TreePrint(tree->right);
+	}
+
+	printf("%s", end);
 }
 
 
