@@ -14,10 +14,7 @@
 	} node;
 
 	node *mknode(char *token, node *left, node*right);
-	//void printtree(node *tree);
-	void Printtree(node *tree);
-	void printTabs(int n);
-	int printlevel=0;
+	void TreePrint(node *tree);
 %}
 
 %union
@@ -41,7 +38,7 @@
 // NODES FUNCTIONS 
 %type<node> program code function exp expressions parameter_list body_func body return  primitiveType argument nothing statment_func declaration
 %type<node> nested_declarations nested_statments nested_statments_func type code_block function_call assignment_statement conditions loops lhs statment
-%type<node> init update forPrimitiveType variable_declaration variableL atributeList
+%type<node> init update integer_literal variable_declaration variableL atributeList string_exp string_array
 
 
 
@@ -56,7 +53,7 @@
 /*  !!! TODO ADD POINTERS AND THIK ABOUT UNARY OPERATORS  STRINGS  ARRAYS COMMENTS !!! */
 
 %%
-program: code { printf("OK\n");  Printtree($1);};
+program: code { printf("CODE\n");  TreePrint($1);};
 
 code:
 	   function code  { $$ = mknode("",$1, $2); }
@@ -94,6 +91,7 @@ body:
 	| nested_declarations {$$=mknode("",$1, NULL);}
 	| nested_statments {$$=mknode("",$1,NULL);}
 	| nothing {$$=mknode("",$1,NULL);}
+	| COMMENT {$$=NULL;}
 	;
 
 body_func: 
@@ -101,6 +99,7 @@ body_func:
 	| nested_declarations  {$$=mknode("",$1, NULL);}
 	| nested_statments_func {$$=mknode("",$1,NULL);}
 	| nothing  {$$=mknode("",$1,NULL);}
+	|  COMMENT {$$=NULL;}
 	;
 
 nested_statments_func:
@@ -128,9 +127,12 @@ nested_declarations:
 declaration:
 	     function { $$ = mknode("",$1, NULL); }
 	   | variable_declaration { $$ = mknode("",$1, NULL); }
+	   | string_array {$$ = mknode("STRING",$1, NULL); }
 	   ;
 	   
-variable_declaration: VAR type variableL { $$ = mknode("VAR",$2, $3); }
+variable_declaration:VAR type variableL { $$ = mknode("VAR",$2, $3); };
+
+string_array: STRING VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES SEMICOLON {$$=mknode($2,$4,NULL);} ;	 
 
 variableL: 
 	     lhs COMMA variableL { $$ = mknode("",$1, $3); }
@@ -167,16 +169,14 @@ loops:
 	| FOR OPEN_ANGLE_BRACES init SEMICOLON exp SEMICOLON update CLOSE_ANGLE_BRACES code_block {$$=mknode("FOR",mknode("INIT", $3, mknode("COND", $5, mknode("UPDATE",$7, NULL))),$9);}
 	;  
 
-assignment_statement:
-	   lhs  ASSIGNMENT expressions SEMICOLON {$$=mknode("=",$1,$3);}
-	 ;
+assignment_statement: lhs  ASSIGNMENT expressions SEMICOLON {$$=mknode("=",$1,$3);};
 
 lhs:
 	   VARIABLE_ID {$$=mknode($1,NULL,NULL);}
 	 | VARIABLE_ID OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode($1,$3,NULL);}
 	 ;
 
-init:  lhs ASSIGNMENT forPrimitiveType {$$=mknode("=",$1,$3);};
+init:  lhs ASSIGNMENT integer_literal {$$=mknode("=",$1,$3);};
 	
 update: lhs ASSIGNMENT exp {$$=mknode("=",$1,$3);};
 
@@ -205,19 +205,26 @@ exp:
 	| primitiveType {$$=mknode("",$1, NULL);} 			
 	| NOT exp {$$=mknode("!",$1,NULL);} 								
 	| VARIABLE_ID {$$=mknode($1,NULL,NULL);}											
-	| function_call							
-	| LENGTH VARIABLE_ID LENGTH									
-	| OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES															
-	| VARIABLE_ID OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES 
-	| ADDRESS VARIABLE_ID 											
-	| ADDRESS VARIABLE_ID OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES 
-	| MULTIPLY VARIABLE_ID								
+	| function_call {$$=mknode($1,NULL,NULL);}	  							
+	| LENGTH VARIABLE_ID LENGTH {$$=mknode($2,NULL,NULL);}	 									
+	| OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES {$$=mknode($2,NULL,NULL);}																
+	| ADDRESS VARIABLE_ID {$$=mknode("ADDRESS-OF",mknode($2,NULL,NULL),NULL);}	  											
+	| ADDRESS VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES {$$=mknode("ADDRESS-OF",mknode($2,$4,NULL),NULL);}	
+	| MULTIPLY VARIABLE_ID {$$=mknode($2,NULL,NULL);}	 								
+	;
+
+string_exp:
+	  string_exp PLUS string_exp {$$=mknode("+",$1,$3);}         			
+	| string_exp MINUS string_exp {$$=mknode("-",$1,$3);}              				
+	| string_exp MULTIPLY string_exp {$$=mknode("*",$1,$3);}								
+	| string_exp DIVISION string_exp {$$=mknode("/",$1,$3);}	
+	| integer_literal {$$=mknode("",$1,NULL);}  	
 	;
 
 
  /* TYPES */
 type: 
-	BOOL 
+	  BOOL {$$=mknode("BOOL",NULL,NULL);} 
 	| CHAR {$$=mknode("CHAR",NULL,NULL);} 
 	| CHAR_P {$$=mknode("CHAR_P",NULL,NULL);} 
 	| INT {$$=mknode("INT",NULL,NULL);} 
@@ -226,20 +233,21 @@ type:
 	| REAL_P {$$=mknode("REAL_P",NULL,NULL);} 
 	| STRING {$$=mknode("STRING",NULL,NULL);} 
 	;
+
 primitiveType: 
-	 NONE {$$=mknode("NONE",NULL,NULL);} 
-	 |BOOL_TRUE {$$=mknode("TRUE",NULL,NULL);} 
-	 |BOOL_FALSE  {$$=mknode("FALSE",NULL,NULL);} 
-	 | CHAR_LITERAL {$$=mknode("CHAR_LITERAL",NULL,NULL);} 
-	 | DECIMAL_LITERAL  {$$=mknode("DECIMAL_LITERAL",NULL,NULL);} 
-	 | HEX_LITERAL {$$=mknode("HEX_LITERAL",NULL,NULL);} 
-	 | REAL_LITERAL  {$$=mknode("REAL_LITERAL",NULL,NULL);} 
-	 | STRING_LITERAL {$$=mknode("STRING_LITERAL",NULL,NULL);} 
+	 NONE {$$=mknode($1,NULL,NULL);} 
+	 |BOOL_TRUE {$$=mknode($1,NULL,NULL);} 
+	 |BOOL_FALSE  {$$=mknode($1,NULL,NULL);} 
+	 | CHAR_LITERAL {$$=mknode($1,NULL,NULL);} 
+	 | DECIMAL_LITERAL  {$$=mknode($1,NULL,NULL);} 
+	 | HEX_LITERAL {$$=mknode($1,NULL,NULL);} 
+	 | REAL_LITERAL  {$$=mknode($1,NULL,NULL);} 
+	 | STRING_LITERAL {$$=mknode($1,NULL,NULL);} 
 	 ;
 
-forPrimitiveType:
-	   DECIMAL_LITERAL  {$$=mknode("DECIMAL_LITERAL",NULL,NULL);} 
-	 | HEX_LITERAL {$$=mknode("HEX_LITERAL",NULL,NULL);} 
+integer_literal:
+	   DECIMAL_LITERAL  {$$=mknode($1,NULL,NULL);} 
+	 | HEX_LITERAL {$$=mknode($1,NULL,NULL);} 
 	 ;
 
 nothing:  {$$=NULL;}; 
@@ -252,61 +260,30 @@ int main()
 	return yyparse();	
 }
 
-/*ADD PROGRAMM C FRO PRINT TREE*/
-/* void printtree(node *tree)
-{
-	printf("%s\n", tree->token);
-		if(tree->left)
-			printtree(tree->left);
-		if(tree->right)
-			printtree(tree->right);
-} 
- */
 
- void printTabs(int n)
+void TreePrint(node* tree)
 {
-	int i;
-	for(i=0;i<n/3;i++)
-		printf(" ");
-}
-void Printtree(node* tree)
-{
-	int flag = 4;
 	printTabs(printlevel); 
 	if(strcmp(tree->token, "VAR") == 0)
 	{
 		
-		printf("(VAR ");
-		flag=2;
-		
-		
+		printf("(VAR ");	
 	}
 	else if(strcmp(tree->token, "IF") == 0)
 	{
-		printf("(IF\n");
-		flag = 1;
-		
+		printf("(IF\n");	
 	}
 	else if(strcmp(tree->token, "WHILE") == 0)
 	{
-		printf("(WHILE\n");
-		flag = 1;
-		
-		
+		printf("(WHILE\n");	
 	}
 	else if(strcmp(tree->token, "DO-WHILE") == 0)
 	{
-		printf("(DO-WHILE\n");
-		flag = 1;
-		
-		
+		printf("(DO-WHILE\n");	
 	}
 	else if(strcmp(tree->token, "FOR") == 0)
 	{
-		printf("(FOR\n");
-		flag = 1;
-		
-		
+		printf("(FOR\n");	
 	}
 	else if(strcmp(tree->token, "FUNC") == 0 || strcmp(tree->token, "CODE") == 0 || strcmp(tree->token, "FUNCTION_CALL") == 0)
 	{
@@ -378,6 +355,20 @@ void Printtree(node* tree)
 				
 	}
 
+	else if(strcmp(tree->token, "STRING") == 0)
+	{
+		printf("(");
+		flag = 2;
+				
+	}
+
+		else if(strcmp(tree->token, "ADDRESS-OF") == 0)
+	{
+		printf("(ADDRESS-OF\n");
+		flag = 2;
+				
+	}
+
 	else if(strcmp(tree->token, "") == 0);
 	else if(strcmp(tree->token, "(") == 0)
 			printf("(");
@@ -432,14 +423,14 @@ strcmp(tree->token, ",") == 0 )
 	if (tree->left) 
 	{
 		printlevel++;
-		Printtree(tree->left);
+	 TreePrint(tree->left);
 		printlevel--;
 	}
 	
 	if (tree->right)
 	{
 		printlevel++;
-		Printtree(tree->right);
+	 TreePrint(tree->right);
 		printlevel--;
 		
 	}

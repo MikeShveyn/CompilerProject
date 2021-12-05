@@ -55,7 +55,7 @@ return {return RETURN;}
 "[" {return OPEN_SQUARE_BRACES;}
 "]" {return CLOSE_SQUARE_BRACES;}
  
- "/""%".*"%""/" {return COMMENT;}
+ "/*"([^*]*|(\*+[^/]))*"*/" {return COMMENT;}
 
   /*Literl*/
 null {return NONE;}  
