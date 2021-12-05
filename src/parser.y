@@ -7,14 +7,16 @@
 	int yyerror(char *error);
 
 	typedef struct node
-	{
+	{	
 		char *token;
 		struct node *left;
 		struct node *right;
 	} node;
 
+	char endings[3][3] ={")","\n)",")\n"}; 
 	node *mknode(char *token, node *left, node*right);
 	void TreePrint(node *tree);
+	
 %}
 
 %union
@@ -261,10 +263,13 @@ int main()
 }
 
 
+
+
 void TreePrint(node* tree)
-{
-	char endings[3][3] ={")","\n)",")\n"};
+{	
+	/* SET  ENDING */
 	char end[3] = "";
+
 	/* CONDITIONS */
 	if(strcmp(tree->token, "IF") == 0){
 		printf("(%s \n",tree->token);
@@ -289,7 +294,7 @@ void TreePrint(node* tree)
 
 	else if(strcmp(tree->token, "IF-ELSE") == 0){
 		printf("(%s \n",tree->token);
-		memcpy(end, endings[1], strlen(endings[1]));			
+		memcpy(end, endings[1], strlen(endings[1]));		
 	}	
 
 	else if(strcmp(tree->token, "INIT") == 0){
@@ -303,15 +308,15 @@ void TreePrint(node* tree)
 	}
 
 	else if(strcmp(tree->token, "COND") == 0){
-	printf("\n(%s",tree->token);
-	memcpy(end, endings[1], strlen(endings[1]));			
+		printf("\n(%s",tree->token);
+		memcpy(end, endings[1], strlen(endings[1]));			
 	}		
 
 	/* FUNCTIONS */
 	else if(strcmp(tree->token, "CODE") == 0){
-			printf("(%s \n",tree->token);
-			memcpy(end, endings[1], strlen(endings[1]));			
-		}			
+		printf("(%s \n",tree->token);
+		memcpy(end, endings[1], strlen(endings[1]));			
+	}			
 
 	else if(strcmp(tree->token, "FUNC") == 0){
 		printf("(%s \n",tree->token);	
@@ -324,7 +329,7 @@ void TreePrint(node* tree)
 	}		
 
 	else if(strcmp(tree->token, "BODY") == 0){
-		printf("(%s ",tree->token);	
+		printf("(%s ",tree->token);
 		if(tree->left->left){
 			memcpy(end, endings[1], strlen(endings[1]));	
 			printf("\n");
@@ -436,11 +441,15 @@ void TreePrint(node* tree)
 	/* POST ORDER CALLS  */
 
 	if (tree->left) {
-	 TreePrint(tree->left);
+
+	 	TreePrint(tree->left);
+		 
 	}
 	
 	if (tree->right){
-	 TreePrint(tree->right);
+
+	 	TreePrint(tree->right);
+
 	}
 
 	printf("%s", end);

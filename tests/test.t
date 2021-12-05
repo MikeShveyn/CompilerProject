@@ -1,7 +1,10 @@
-void checkStmt(){
-    y = x + y + z;
-    x = f*2;
-    z = f;
-
- 
+void foo(int x, y, z; real f){
+    if (x>y) {
+        x = x + f;
+    }
+    else {
+        y = x + y + z;
+        x = f*2;
+        z = f;
+    }
 }
