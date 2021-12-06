@@ -16,6 +16,9 @@
 	char endings[3][3] ={")","\n)",")\n"}; 
 	node *mknode(char *token, node *left, node*right);
 	void TreePrint(node *tree);
+	void CalcShift(int t);
+	int shift = 0;
+	int insideBlock = 0;
 	
 %}
 
@@ -263,6 +266,11 @@ int main()
 }
 
 
+void CalcShift(int t) {
+	for(int i= 0; i < t; i++){
+		printf(" ");
+	}
+}
 
 
 void TreePrint(node* tree)
@@ -272,27 +280,32 @@ void TreePrint(node* tree)
 
 	/* CONDITIONS */
 	if(strcmp(tree->token, "IF") == 0){
+		shift++;
 		printf("(%s \n",tree->token);
 		memcpy(end, endings[2], strlen(endings[2]));	
 		
 	}
 
 	else if(strcmp(tree->token, "WHILE") == 0){
+		shift++;
 		printf("(%s \n",tree->token);	
 		memcpy(end, endings[1], strlen(endings[1]));	
 	}
 
 	else if(strcmp(tree->token, "DO-WHILE") == 0){
+		shift++;
 		printf("(%s \n",tree->token);
 		memcpy(end, endings[2], strlen(endings[2]));			
 	}		
 
 	else if(strcmp(tree->token, "FOR") == 0){
+		shift++;
 		printf("(%s \n",tree->token);
 		memcpy(end, endings[1], strlen(endings[1]));			
 	}		
 
 	else if(strcmp(tree->token, "IF-ELSE") == 0){
+		shift++;
 		printf("(%s \n",tree->token);
 		memcpy(end, endings[1], strlen(endings[1]));		
 	}	
@@ -308,7 +321,7 @@ void TreePrint(node* tree)
 	}
 
 	else if(strcmp(tree->token, "COND") == 0){
-		printf("\n(%s",tree->token);
+		printf("(%s",tree->token);
 		memcpy(end, endings[1], strlen(endings[1]));			
 	}		
 
@@ -329,6 +342,7 @@ void TreePrint(node* tree)
 	}		
 
 	else if(strcmp(tree->token, "BODY") == 0){
+		shift++;
 		printf("(%s ",tree->token);
 		if(tree->left->left){
 			memcpy(end, endings[1], strlen(endings[1]));	
@@ -340,7 +354,13 @@ void TreePrint(node* tree)
 	}	
 
 	else if(strcmp(tree->token, "CODE_BLOCK") == 0){
-		printf("\n(%s \n",tree->token);
+		if(insideBlock == 0){
+			insideBlock = 1;
+		}else {
+			insideBlock = 0;
+		}
+		shift++;
+		printf("(%s \n",tree->token);
 		memcpy(end, endings[1], strlen(endings[1]));				
 	}	
 
@@ -362,6 +382,7 @@ void TreePrint(node* tree)
 
 	else if(strcmp(tree->token, "RET-VOID") == 0){
 		printf("\n(%s)\n",tree->token);	
+
 	}
 
 	else if(strcmp(tree->token, "RET") == 0){
@@ -419,7 +440,10 @@ void TreePrint(node* tree)
 	strcmp(tree->token, "+") == 0 || strcmp(tree->token, "*") == 0 || strcmp(tree->token, "&") == 0 || 
 	strcmp(tree->token, "^") == 0 || strcmp(tree->token, "|") == 0 || strcmp(tree->token, ",") == 0 ){
 
-		printf("\n(%s", tree->token);
+		
+		printf("\n");
+		CalcShift(shift);
+		printf("(%s ", tree->token);
 		memcpy(end, endings[2], strlen(endings[2]));
 	}
 
@@ -431,28 +455,49 @@ void TreePrint(node* tree)
 
 	else{
 		if(tree && (!tree->left && !tree->right)){
-			printf("%s", tree->token);
+			printf("%s ", tree->token);
 		}
 		else{
-			printf("%s", tree->token);
+			printf("%s ", tree->token);
 		}
 	}
 
-	/* POST ORDER CALLS  */
 
+
+		
+	/* POST ORDER CALLS  */
 	if (tree->left) {
+		
+		CalcShift(shift);
 
 	 	TreePrint(tree->left);
-		 
+
+							
+		if(shift > 0 && insideBlock == 0) {
+			shift--;
+		}
 	}
 	
 	if (tree->right){
 
+		CalcShift(shift);
+
 	 	TreePrint(tree->right);
 
+		if(shift> 0 && insideBlock == 0) {
+			shift--;
+		}
 	}
 
-	printf("%s", end);
+	if(strcmp(end, "\n)") == 0){
+		printf("%s", end);
+		CalcShift(shift);
+	}else{
+		CalcShift(shift);
+		printf("%s", end);
+	}
+	
+	
 }
 
 
