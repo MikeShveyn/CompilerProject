@@ -87,10 +87,9 @@
 	void TreePrint(node *tree);
 	void CalcShift(int t);
 	int shift = 0;
-	int insideBlock = 0;
 	
 
-#line 94 "y.tab.c"
+#line 93 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -248,12 +247,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 26 "parser.y"
+#line 25 "parser.y"
 
 	struct node *node;
     char *str;
 
-#line 257 "y.tab.c"
+#line 256 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -633,17 +632,17 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    61,    61,    64,    65,    70,    75,    82,    83,    84,
-      87,    90,    91,    95,    96,    97,    98,    99,   103,   104,
-     105,   106,   107,   111,   112,   116,   117,   118,   119,   120,
-     124,   128,   129,   133,   134,   135,   138,   140,   143,   144,
-     145,   146,   151,   152,   156,   157,   158,   159,   160,   161,
-     164,   167,   168,   172,   173,   174,   177,   180,   181,   184,
-     186,   188,   192,   193,   194,   198,   199,   200,   201,   202,
-     203,   204,   205,   206,   207,   208,   209,   210,   211,   212,
-     213,   214,   215,   216,   217,   218,   222,   223,   224,   225,
-     226,   232,   233,   234,   235,   236,   237,   238,   239,   243,
-     244,   245,   246,   247,   248,   249,   250,   254,   255,   258
+       0,    60,    60,    63,    64,    69,    74,    81,    82,    83,
+      86,    89,    90,    94,    95,    96,    97,    98,   102,   103,
+     104,   105,   106,   110,   111,   115,   116,   117,   118,   119,
+     123,   127,   128,   132,   133,   134,   137,   139,   142,   143,
+     144,   145,   150,   151,   155,   156,   157,   158,   159,   160,
+     163,   166,   167,   171,   172,   173,   176,   179,   180,   183,
+     185,   187,   191,   192,   193,   197,   198,   199,   200,   201,
+     202,   203,   204,   205,   206,   207,   208,   209,   210,   211,
+     212,   213,   214,   215,   216,   217,   221,   222,   223,   224,
+     225,   231,   232,   233,   234,   235,   236,   237,   238,   242,
+     243,   244,   245,   246,   247,   248,   249,   253,   254,   257
 };
 #endif
 
@@ -1622,659 +1621,659 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 61 "parser.y"
+#line 60 "parser.y"
               { TreePrint((yyvsp[0].node));}
-#line 1628 "y.tab.c"
+#line 1627 "y.tab.c"
     break;
 
   case 3:
-#line 64 "parser.y"
+#line 63 "parser.y"
                           { (yyval.node) = mknode("",(yyvsp[-1].node), (yyvsp[0].node)); }
-#line 1634 "y.tab.c"
+#line 1633 "y.tab.c"
     break;
 
   case 4:
-#line 65 "parser.y"
+#line 64 "parser.y"
                       { (yyval.node) = mknode("",(yyvsp[0].node), NULL); }
-#line 1640 "y.tab.c"
+#line 1639 "y.tab.c"
     break;
 
   case 5:
-#line 71 "parser.y"
+#line 70 "parser.y"
            {
- 			 (yyval.node)=mknode("FUNC", mknode((yyvsp[-7].str),mknode("\n",NULL,NULL), mknode("",mknode("ARGS",(yyvsp[-5].node), NULL) ,mknode("RET",(yyvsp[-8].node), NULL))), mknode("BODY",(yyvsp[-2].node),(yyvsp[-1].node)));
+ 			 (yyval.node)=mknode("FUNC", mknode((yyvsp[-7].str),mknode("",NULL,NULL), mknode("",mknode("ARGS",(yyvsp[-5].node), NULL) ,mknode("RET",(yyvsp[-8].node), NULL))), mknode("BODY",(yyvsp[-2].node),(yyvsp[-1].node)));
 	   }
-#line 1648 "y.tab.c"
+#line 1647 "y.tab.c"
     break;
 
   case 6:
-#line 76 "parser.y"
+#line 75 "parser.y"
                 {
 			 (yyval.node)=mknode("FUNC", mknode((yyvsp[-6].str),mknode("\n",NULL,NULL), mknode("",mknode("ARGS",(yyvsp[-4].node), NULL) ,mknode("RET-VOID",NULL, NULL))), mknode("BODY",(yyvsp[-1].node),NULL));
 		}
-#line 1656 "y.tab.c"
+#line 1655 "y.tab.c"
     break;
 
   case 7:
-#line 82 "parser.y"
+#line 81 "parser.y"
                                              {(yyval.node)=mknode("",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1662 "y.tab.c"
+#line 1661 "y.tab.c"
     break;
 
   case 8:
-#line 83 "parser.y"
+#line 82 "parser.y"
                     {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1668 "y.tab.c"
+#line 1667 "y.tab.c"
     break;
 
   case 9:
-#line 84 "parser.y"
-                  {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1674 "y.tab.c"
+#line 83 "parser.y"
+                  {(yyval.node)=mknode("NONE",(yyvsp[0].node),NULL);}
+#line 1673 "y.tab.c"
     break;
 
   case 10:
-#line 87 "parser.y"
+#line 86 "parser.y"
                             {(yyval.node)=mknode("ARG-TYPE",(yyvsp[-1].node),(yyvsp[0].node));}
-#line 1680 "y.tab.c"
+#line 1679 "y.tab.c"
     break;
 
   case 11:
-#line 90 "parser.y"
+#line 89 "parser.y"
                                          {(yyval.node)=mknode((yyvsp[-2].str),(yyvsp[0].node),NULL);}
-#line 1686 "y.tab.c"
+#line 1685 "y.tab.c"
     break;
 
   case 12:
-#line 91 "parser.y"
+#line 90 "parser.y"
                       {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 1692 "y.tab.c"
+#line 1691 "y.tab.c"
     break;
 
   case 13:
-#line 95 "parser.y"
+#line 94 "parser.y"
                                                {(yyval.node)=mknode("",(yyvsp[-1].node),(yyvsp[0].node));}
-#line 1698 "y.tab.c"
+#line 1697 "y.tab.c"
     break;
 
   case 14:
-#line 96 "parser.y"
+#line 95 "parser.y"
                               {(yyval.node)=mknode("",(yyvsp[0].node), NULL);}
-#line 1704 "y.tab.c"
+#line 1703 "y.tab.c"
     break;
 
   case 15:
-#line 97 "parser.y"
+#line 96 "parser.y"
                            {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1710 "y.tab.c"
+#line 1709 "y.tab.c"
     break;
 
   case 16:
-#line 98 "parser.y"
+#line 97 "parser.y"
                   {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1716 "y.tab.c"
+#line 1715 "y.tab.c"
     break;
 
   case 17:
-#line 99 "parser.y"
+#line 98 "parser.y"
                   {(yyval.node)=NULL;}
-#line 1722 "y.tab.c"
+#line 1721 "y.tab.c"
     break;
 
   case 18:
-#line 103 "parser.y"
+#line 102 "parser.y"
                                                     {(yyval.node)=mknode("",(yyvsp[-1].node),(yyvsp[0].node));}
-#line 1728 "y.tab.c"
+#line 1727 "y.tab.c"
     break;
 
   case 19:
-#line 104 "parser.y"
+#line 103 "parser.y"
                                {(yyval.node)=mknode("",(yyvsp[0].node), NULL);}
-#line 1734 "y.tab.c"
+#line 1733 "y.tab.c"
     break;
 
   case 20:
-#line 105 "parser.y"
+#line 104 "parser.y"
                                 {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1740 "y.tab.c"
+#line 1739 "y.tab.c"
     break;
 
   case 21:
-#line 106 "parser.y"
+#line 105 "parser.y"
                    {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1746 "y.tab.c"
+#line 1745 "y.tab.c"
     break;
 
   case 22:
-#line 107 "parser.y"
+#line 106 "parser.y"
                    {(yyval.node)=NULL;}
-#line 1752 "y.tab.c"
+#line 1751 "y.tab.c"
     break;
 
   case 23:
-#line 111 "parser.y"
+#line 110 "parser.y"
                                                  {(yyval.node)=mknode("",(yyvsp[-1].node),(yyvsp[0].node));}
-#line 1758 "y.tab.c"
+#line 1757 "y.tab.c"
     break;
 
   case 24:
-#line 112 "parser.y"
+#line 111 "parser.y"
                            {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1764 "y.tab.c"
+#line 1763 "y.tab.c"
     break;
 
   case 25:
-#line 116 "parser.y"
+#line 115 "parser.y"
                                 {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1770 "y.tab.c"
+#line 1769 "y.tab.c"
     break;
 
   case 26:
-#line 117 "parser.y"
+#line 116 "parser.y"
                                   {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1776 "y.tab.c"
+#line 1775 "y.tab.c"
     break;
 
   case 27:
-#line 118 "parser.y"
+#line 117 "parser.y"
                         {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1782 "y.tab.c"
+#line 1781 "y.tab.c"
     break;
 
   case 28:
-#line 119 "parser.y"
+#line 118 "parser.y"
                    {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1788 "y.tab.c"
+#line 1787 "y.tab.c"
     break;
 
   case 29:
-#line 120 "parser.y"
+#line 119 "parser.y"
                         {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1794 "y.tab.c"
+#line 1793 "y.tab.c"
     break;
 
   case 30:
-#line 124 "parser.y"
+#line 123 "parser.y"
                                                                                {(yyval.node)=mknode("FUNCTION_CALL",(yyvsp[-4].node),(yyvsp[-2].node));}
-#line 1800 "y.tab.c"
+#line 1799 "y.tab.c"
     break;
 
   case 31:
-#line 128 "parser.y"
+#line 127 "parser.y"
                                            {(yyval.node)=mknode("",(yyvsp[-1].node),(yyvsp[0].node));}
-#line 1806 "y.tab.c"
+#line 1805 "y.tab.c"
     break;
 
   case 32:
-#line 129 "parser.y"
+#line 128 "parser.y"
                        {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1812 "y.tab.c"
+#line 1811 "y.tab.c"
     break;
 
   case 33:
-#line 133 "parser.y"
+#line 132 "parser.y"
                       { (yyval.node) = mknode("",(yyvsp[0].node), NULL); }
-#line 1818 "y.tab.c"
+#line 1817 "y.tab.c"
     break;
 
   case 34:
-#line 134 "parser.y"
+#line 133 "parser.y"
                                   { (yyval.node) = mknode("",(yyvsp[0].node), NULL); }
-#line 1824 "y.tab.c"
+#line 1823 "y.tab.c"
     break;
 
   case 35:
-#line 135 "parser.y"
+#line 134 "parser.y"
                           {(yyval.node) = mknode("STRING",(yyvsp[0].node), NULL); }
-#line 1830 "y.tab.c"
+#line 1829 "y.tab.c"
     break;
 
   case 36:
-#line 138 "parser.y"
+#line 137 "parser.y"
                                         { (yyval.node) = mknode("VAR",(yyvsp[-1].node), (yyvsp[0].node)); }
-#line 1836 "y.tab.c"
+#line 1835 "y.tab.c"
     break;
 
   case 37:
-#line 140 "parser.y"
+#line 139 "parser.y"
                                                                                              {(yyval.node)=mknode((yyvsp[-4].str),(yyvsp[-2].node),NULL);}
-#line 1842 "y.tab.c"
+#line 1841 "y.tab.c"
     break;
 
   case 38:
-#line 143 "parser.y"
+#line 142 "parser.y"
                                  { (yyval.node) = mknode("",(yyvsp[-2].node), (yyvsp[0].node)); }
-#line 1848 "y.tab.c"
+#line 1847 "y.tab.c"
     break;
 
   case 39:
-#line 144 "parser.y"
+#line 143 "parser.y"
                                                  { (yyval.node) = mknode("=",(yyvsp[-4].node), mknode("",(yyvsp[-2].node), mknode("",(yyvsp[0].node),NULL))); }
-#line 1854 "y.tab.c"
+#line 1853 "y.tab.c"
     break;
 
   case 40:
-#line 145 "parser.y"
+#line 144 "parser.y"
                                           { (yyval.node) = mknode("=",(yyvsp[-3].node), (yyvsp[-1].node)); }
-#line 1860 "y.tab.c"
+#line 1859 "y.tab.c"
     break;
 
   case 41:
-#line 146 "parser.y"
+#line 145 "parser.y"
                            { (yyval.node) = mknode("",(yyvsp[-1].node), NULL); }
-#line 1866 "y.tab.c"
+#line 1865 "y.tab.c"
     break;
 
   case 42:
-#line 151 "parser.y"
+#line 150 "parser.y"
                                        {(yyval.node)=mknode("",(yyvsp[-1].node),(yyvsp[0].node));}
-#line 1872 "y.tab.c"
+#line 1871 "y.tab.c"
     break;
 
   case 43:
-#line 152 "parser.y"
+#line 151 "parser.y"
                       {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1878 "y.tab.c"
+#line 1877 "y.tab.c"
     break;
 
   case 44:
-#line 156 "parser.y"
+#line 155 "parser.y"
                             {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1884 "y.tab.c"
+#line 1883 "y.tab.c"
     break;
 
   case 45:
-#line 157 "parser.y"
+#line 156 "parser.y"
                                     {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1890 "y.tab.c"
+#line 1889 "y.tab.c"
     break;
 
   case 46:
-#line 158 "parser.y"
+#line 157 "parser.y"
                      {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1896 "y.tab.c"
+#line 1895 "y.tab.c"
     break;
 
   case 47:
-#line 159 "parser.y"
+#line 158 "parser.y"
                         {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1902 "y.tab.c"
+#line 1901 "y.tab.c"
     break;
 
   case 48:
-#line 160 "parser.y"
+#line 159 "parser.y"
                    {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1908 "y.tab.c"
+#line 1907 "y.tab.c"
     break;
 
   case 49:
-#line 161 "parser.y"
+#line 160 "parser.y"
                         {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1914 "y.tab.c"
+#line 1913 "y.tab.c"
     break;
 
   case 50:
-#line 164 "parser.y"
+#line 163 "parser.y"
                                                        {(yyval.node)=mknode("CODE_BLOCK",(yyvsp[-1].node),NULL);}
-#line 1920 "y.tab.c"
+#line 1919 "y.tab.c"
     break;
 
   case 51:
-#line 167 "parser.y"
+#line 166 "parser.y"
                                                                   {(yyval.node)=mknode("IF",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1926 "y.tab.c"
+#line 1925 "y.tab.c"
     break;
 
   case 52:
-#line 168 "parser.y"
+#line 167 "parser.y"
                                                                                  {(yyval.node)=mknode("IF-ELSE", mknode("",(yyvsp[-4].node),(yyvsp[-2].node)), mknode("",(yyvsp[0].node),NULL));}
-#line 1932 "y.tab.c"
+#line 1931 "y.tab.c"
     break;
 
   case 53:
-#line 172 "parser.y"
+#line 171 "parser.y"
                                                                     {(yyval.node)=mknode("WHILE",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1938 "y.tab.c"
+#line 1937 "y.tab.c"
     break;
 
   case 54:
-#line 173 "parser.y"
+#line 172 "parser.y"
                                                                                 {(yyval.node)=mknode("DO-WHILE",(yyvsp[-5].node),(yyvsp[-2].node));}
-#line 1944 "y.tab.c"
+#line 1943 "y.tab.c"
     break;
 
   case 55:
-#line 174 "parser.y"
+#line 173 "parser.y"
                                                                                                   {(yyval.node)=mknode("FOR",mknode("INIT", (yyvsp[-6].node), mknode("COND", (yyvsp[-4].node), mknode("UPDATE",(yyvsp[-2].node), NULL))),(yyvsp[0].node));}
-#line 1950 "y.tab.c"
+#line 1949 "y.tab.c"
     break;
 
   case 56:
-#line 177 "parser.y"
+#line 176 "parser.y"
                                                             {(yyval.node)=mknode("=",(yyvsp[-3].node),(yyvsp[-1].node));}
-#line 1956 "y.tab.c"
+#line 1955 "y.tab.c"
     break;
 
   case 57:
-#line 180 "parser.y"
+#line 179 "parser.y"
                        {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 1962 "y.tab.c"
+#line 1961 "y.tab.c"
     break;
 
   case 58:
-#line 181 "parser.y"
+#line 180 "parser.y"
                                                                   {(yyval.node)=mknode((yyvsp[-3].str),(yyvsp[-1].node),NULL);}
-#line 1968 "y.tab.c"
+#line 1967 "y.tab.c"
     break;
 
   case 59:
-#line 184 "parser.y"
+#line 183 "parser.y"
                                       {(yyval.node)=mknode("=",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1974 "y.tab.c"
+#line 1973 "y.tab.c"
     break;
 
   case 60:
-#line 186 "parser.y"
+#line 185 "parser.y"
                            {(yyval.node)=mknode("=",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1980 "y.tab.c"
+#line 1979 "y.tab.c"
     break;
 
   case 61:
-#line 188 "parser.y"
+#line 187 "parser.y"
                              {(yyval.node)=mknode("RET",(yyvsp[-1].node),NULL);}
-#line 1986 "y.tab.c"
+#line 1985 "y.tab.c"
     break;
 
   case 62:
-#line 192 "parser.y"
+#line 191 "parser.y"
                          {(yyval.node)=mknode("",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 1992 "y.tab.c"
+#line 1991 "y.tab.c"
     break;
 
   case 63:
-#line 193 "parser.y"
+#line 192 "parser.y"
        {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 1998 "y.tab.c"
+#line 1997 "y.tab.c"
     break;
 
   case 64:
-#line 194 "parser.y"
+#line 193 "parser.y"
            {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 2004 "y.tab.c"
+#line 2003 "y.tab.c"
     break;
 
   case 65:
-#line 198 "parser.y"
+#line 197 "parser.y"
                        {(yyval.node)=mknode("+",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2010 "y.tab.c"
+#line 2009 "y.tab.c"
     break;
 
   case 66:
-#line 199 "parser.y"
+#line 198 "parser.y"
                         {(yyval.node)=mknode("-",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2016 "y.tab.c"
+#line 2015 "y.tab.c"
     break;
 
   case 67:
-#line 200 "parser.y"
+#line 199 "parser.y"
                            {(yyval.node)=mknode("*",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2022 "y.tab.c"
+#line 2021 "y.tab.c"
     break;
 
   case 68:
-#line 201 "parser.y"
+#line 200 "parser.y"
                            {(yyval.node)=mknode("/",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2028 "y.tab.c"
+#line 2027 "y.tab.c"
     break;
 
   case 69:
-#line 202 "parser.y"
+#line 201 "parser.y"
                       {(yyval.node)=mknode("==",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2034 "y.tab.c"
+#line 2033 "y.tab.c"
     break;
 
   case 70:
-#line 203 "parser.y"
+#line 202 "parser.y"
                           {(yyval.node)=mknode("!=",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2040 "y.tab.c"
+#line 2039 "y.tab.c"
     break;
 
   case 71:
-#line 204 "parser.y"
+#line 203 "parser.y"
                        {(yyval.node)=mknode("<",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2046 "y.tab.c"
+#line 2045 "y.tab.c"
     break;
 
   case 72:
-#line 205 "parser.y"
+#line 204 "parser.y"
                            {(yyval.node)=mknode("<=",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2052 "y.tab.c"
+#line 2051 "y.tab.c"
     break;
 
   case 73:
-#line 206 "parser.y"
+#line 205 "parser.y"
                           {(yyval.node)=mknode(">",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2058 "y.tab.c"
+#line 2057 "y.tab.c"
     break;
 
   case 74:
-#line 207 "parser.y"
+#line 206 "parser.y"
                               {(yyval.node)=mknode(">=",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2064 "y.tab.c"
+#line 2063 "y.tab.c"
     break;
 
   case 75:
-#line 208 "parser.y"
+#line 207 "parser.y"
                  {(yyval.node)=mknode("||",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2070 "y.tab.c"
+#line 2069 "y.tab.c"
     break;
 
   case 76:
-#line 209 "parser.y"
+#line 208 "parser.y"
                       {(yyval.node)=mknode("&&",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2076 "y.tab.c"
+#line 2075 "y.tab.c"
     break;
 
   case 77:
-#line 210 "parser.y"
+#line 209 "parser.y"
                         {(yyval.node)=mknode("",(yyvsp[0].node), NULL);}
-#line 2082 "y.tab.c"
+#line 2081 "y.tab.c"
     break;
 
   case 78:
-#line 211 "parser.y"
+#line 210 "parser.y"
                   {(yyval.node)=mknode("!",(yyvsp[0].node),NULL);}
-#line 2088 "y.tab.c"
+#line 2087 "y.tab.c"
     break;
 
   case 79:
-#line 212 "parser.y"
+#line 211 "parser.y"
                       {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 2094 "y.tab.c"
+#line 2093 "y.tab.c"
     break;
 
   case 80:
-#line 213 "parser.y"
-                        {(yyval.node)=mknode((yyvsp[0].node),NULL,NULL);}
-#line 2100 "y.tab.c"
+#line 212 "parser.y"
+                        {(yyval.node)=mknode("function_call",(yyvsp[0].node),NULL);}
+#line 2099 "y.tab.c"
     break;
 
   case 81:
-#line 214 "parser.y"
+#line 213 "parser.y"
                                     {(yyval.node)=mknode((yyvsp[-1].str),NULL,NULL);}
-#line 2106 "y.tab.c"
+#line 2105 "y.tab.c"
     break;
 
   case 82:
-#line 215 "parser.y"
-                                                   {(yyval.node)=mknode((yyvsp[-1].node),NULL,NULL);}
-#line 2112 "y.tab.c"
+#line 214 "parser.y"
+                                                   {(yyval.node)=mknode("exp",(yyvsp[-1].node),NULL);}
+#line 2111 "y.tab.c"
     break;
 
   case 83:
-#line 216 "parser.y"
+#line 215 "parser.y"
                               {(yyval.node)=mknode("ADDRESS-OF",mknode((yyvsp[0].str),NULL,NULL),NULL);}
-#line 2118 "y.tab.c"
+#line 2117 "y.tab.c"
     break;
 
   case 84:
-#line 217 "parser.y"
+#line 216 "parser.y"
                                                                                 {(yyval.node)=mknode("ADDRESS-OF",mknode((yyvsp[-3].str),(yyvsp[-1].node),NULL),NULL);}
-#line 2124 "y.tab.c"
+#line 2123 "y.tab.c"
     break;
 
   case 85:
-#line 218 "parser.y"
+#line 217 "parser.y"
                                {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 2130 "y.tab.c"
+#line 2129 "y.tab.c"
     break;
 
   case 86:
-#line 222 "parser.y"
+#line 221 "parser.y"
                                      {(yyval.node)=mknode("+",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2136 "y.tab.c"
+#line 2135 "y.tab.c"
     break;
 
   case 87:
-#line 223 "parser.y"
+#line 222 "parser.y"
                                       {(yyval.node)=mknode("-",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2142 "y.tab.c"
+#line 2141 "y.tab.c"
     break;
 
   case 88:
-#line 224 "parser.y"
+#line 223 "parser.y"
                                          {(yyval.node)=mknode("*",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2148 "y.tab.c"
+#line 2147 "y.tab.c"
     break;
 
   case 89:
-#line 225 "parser.y"
+#line 224 "parser.y"
                                          {(yyval.node)=mknode("/",(yyvsp[-2].node),(yyvsp[0].node));}
-#line 2154 "y.tab.c"
+#line 2153 "y.tab.c"
     break;
 
   case 90:
-#line 226 "parser.y"
+#line 225 "parser.y"
                           {(yyval.node)=mknode("",(yyvsp[0].node),NULL);}
-#line 2160 "y.tab.c"
+#line 2159 "y.tab.c"
     break;
 
   case 91:
-#line 232 "parser.y"
+#line 231 "parser.y"
                {(yyval.node)=mknode("BOOL",NULL,NULL);}
-#line 2166 "y.tab.c"
+#line 2165 "y.tab.c"
     break;
 
   case 92:
-#line 233 "parser.y"
+#line 232 "parser.y"
                {(yyval.node)=mknode("CHAR",NULL,NULL);}
-#line 2172 "y.tab.c"
+#line 2171 "y.tab.c"
     break;
 
   case 93:
-#line 234 "parser.y"
+#line 233 "parser.y"
                  {(yyval.node)=mknode("CHAR_P",NULL,NULL);}
-#line 2178 "y.tab.c"
+#line 2177 "y.tab.c"
     break;
 
   case 94:
-#line 235 "parser.y"
+#line 234 "parser.y"
               {(yyval.node)=mknode("INT",NULL,NULL);}
-#line 2184 "y.tab.c"
+#line 2183 "y.tab.c"
     break;
 
   case 95:
-#line 236 "parser.y"
+#line 235 "parser.y"
                 {(yyval.node)=mknode("INT_P",NULL,NULL);}
-#line 2190 "y.tab.c"
+#line 2189 "y.tab.c"
     break;
 
   case 96:
-#line 237 "parser.y"
+#line 236 "parser.y"
                {(yyval.node)=mknode("REAL",NULL,NULL);}
-#line 2196 "y.tab.c"
+#line 2195 "y.tab.c"
     break;
 
   case 97:
-#line 238 "parser.y"
+#line 237 "parser.y"
                  {(yyval.node)=mknode("REAL_P",NULL,NULL);}
-#line 2202 "y.tab.c"
+#line 2201 "y.tab.c"
     break;
 
   case 98:
-#line 239 "parser.y"
+#line 238 "parser.y"
                  {(yyval.node)=mknode("STRING",NULL,NULL);}
-#line 2208 "y.tab.c"
+#line 2207 "y.tab.c"
     break;
 
   case 99:
-#line 243 "parser.y"
+#line 242 "parser.y"
               {(yyval.node)=mknode("None",NULL,NULL);}
-#line 2214 "y.tab.c"
+#line 2213 "y.tab.c"
     break;
 
   case 100:
-#line 244 "parser.y"
+#line 243 "parser.y"
                     {(yyval.node)=mknode("True",NULL,NULL);}
-#line 2220 "y.tab.c"
+#line 2219 "y.tab.c"
     break;
 
   case 101:
-#line 245 "parser.y"
+#line 244 "parser.y"
                       {(yyval.node)=mknode("False",NULL,NULL);}
-#line 2226 "y.tab.c"
+#line 2225 "y.tab.c"
     break;
 
   case 102:
-#line 246 "parser.y"
+#line 245 "parser.y"
                         {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 2232 "y.tab.c"
+#line 2231 "y.tab.c"
     break;
 
   case 103:
-#line 247 "parser.y"
+#line 246 "parser.y"
                             {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 2238 "y.tab.c"
+#line 2237 "y.tab.c"
     break;
 
   case 104:
-#line 248 "parser.y"
+#line 247 "parser.y"
                        {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 2244 "y.tab.c"
+#line 2243 "y.tab.c"
     break;
 
   case 105:
-#line 249 "parser.y"
+#line 248 "parser.y"
                          {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 2250 "y.tab.c"
+#line 2249 "y.tab.c"
     break;
 
   case 106:
-#line 250 "parser.y"
+#line 249 "parser.y"
                           {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 2256 "y.tab.c"
+#line 2255 "y.tab.c"
     break;
 
   case 107:
-#line 254 "parser.y"
+#line 253 "parser.y"
                             {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 2262 "y.tab.c"
+#line 2261 "y.tab.c"
     break;
 
   case 108:
-#line 255 "parser.y"
+#line 254 "parser.y"
                        {(yyval.node)=mknode((yyvsp[0].str),NULL,NULL);}
-#line 2268 "y.tab.c"
+#line 2267 "y.tab.c"
     break;
 
   case 109:
-#line 258 "parser.y"
+#line 257 "parser.y"
           {(yyval.node)=NULL;}
-#line 2274 "y.tab.c"
+#line 2273 "y.tab.c"
     break;
 
 
-#line 2278 "y.tab.c"
+#line 2277 "y.tab.c"
 
       default: break;
     }
@@ -2506,7 +2505,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 261 "parser.y"
+#line 260 "parser.y"
 
 
 int main()
@@ -2522,232 +2521,36 @@ void CalcShift(int t) {
 }
 
 
-void TreePrint(node* tree)
-{	
-	/* SET  ENDING */
-	char end[3] = "";
 
-	/* CONDITIONS */
-	if(strcmp(tree->token, "IF") == 0){
+void TreePrint(node* tree){
+	if(strcmp(tree->token, "FUNC") == 0 || strcmp(tree->token, "BODY") == 0){
+		printf("(%s \n",tree->token);
 		shift++;
-		printf("(%s \n",tree->token);
-		memcpy(end, endings[2], strlen(endings[2]));	
-		
-	}
-
-	else if(strcmp(tree->token, "WHILE") == 0){
-		shift++;
-		printf("(%s \n",tree->token);	
-		memcpy(end, endings[1], strlen(endings[1]));	
-	}
-
-	else if(strcmp(tree->token, "DO-WHILE") == 0){
-		shift++;
-		printf("(%s \n",tree->token);
-		memcpy(end, endings[2], strlen(endings[2]));			
-	}		
-
-	else if(strcmp(tree->token, "FOR") == 0){
-		shift++;
-		printf("(%s \n",tree->token);
-		memcpy(end, endings[1], strlen(endings[1]));			
-	}		
-
-	else if(strcmp(tree->token, "IF-ELSE") == 0){
-		shift++;
-		printf("(%s \n",tree->token);
-		memcpy(end, endings[1], strlen(endings[1]));		
-	}	
-
-	else if(strcmp(tree->token, "INIT") == 0){
-		printf("(%s \n",tree->token);
-		memcpy(end, endings[1], strlen(endings[1]));			
-	}
-
-	else if(strcmp(tree->token, "UPDATE") == 0){
-		printf("(%s \n",tree->token);
-		memcpy(end, endings[1], strlen(endings[1]));			
-	}
-
-	else if(strcmp(tree->token, "COND") == 0){
-		printf("(%s",tree->token);
-		memcpy(end, endings[1], strlen(endings[1]));			
-	}		
-
-	/* FUNCTIONS */
-	else if(strcmp(tree->token, "CODE") == 0){
-		printf("(%s \n",tree->token);
-		memcpy(end, endings[1], strlen(endings[1]));			
-	}			
-
-	else if(strcmp(tree->token, "FUNC") == 0){
-		printf("(%s \n",tree->token);	
-		memcpy(end, endings[1], strlen(endings[1]));				
-	}	
-
-	else if(strcmp(tree->token, "FUNCTION_CALL") == 0){
-		printf("(%s \n",tree->token);	
-		memcpy(end, endings[1], strlen(endings[1]));				
-	}		
-
-	else if(strcmp(tree->token, "BODY") == 0){
-		shift++;
+		CalcShift(shift);
+	}else if(strcmp(tree->token, "ARGS") == 0 || strcmp(tree->token, "RET") == 0){
 		printf("(%s ",tree->token);
-		if(tree->left->left){
-			memcpy(end, endings[1], strlen(endings[1]));	
-			printf("\n");
-		}
-		else{
-			printf(" NONE)\n"); 
-		}		
-	}	
-
-	else if(strcmp(tree->token, "CODE_BLOCK") == 0){
-		if(insideBlock == 0){
-			insideBlock = 1;
-		}else {
-			insideBlock = 0;
-		}
-		shift++;
-		printf("(%s \n",tree->token);
-		memcpy(end, endings[1], strlen(endings[1]));				
-	}	
-
-	else if(strcmp(tree->token, "ARGS") == 0){
-		printf("(%s ",tree->token);	
-		if(tree->left->left){
-			memcpy(end, endings[1], strlen(endings[2]));	
-			printf("\n");
-		}
-		else{
-			printf(" NONE)\n"); 
-		}
-	}
-
-	else if(strcmp(tree->token, "ARG-TYPE") == 0){
-		printf("( ");	
-		memcpy(end, endings[0], strlen(endings[0]));	
-	}
-
-	else if(strcmp(tree->token, "RET-VOID") == 0){
-		printf("\n(%s)\n",tree->token);	
-
-	}
-
-	else if(strcmp(tree->token, "RET") == 0){
-		printf("\n(%s ",tree->token);
-		if(tree->left){
-			memcpy(end, endings[2], strlen(endings[2]));
-		}
-		else{
-			printf(" NONE)\n"); 
-		}	
-	}	
-
-	/* DECALRATION */
-	else if(strcmp(tree->token, "VAR") == 0){
-		printf("(%s ",tree->token);	
-		memcpy(end, endings[0], strlen(endings[0]));
-	}	
-
-	else if(strcmp(tree->token, "ADDRESS-OF") == 0){
-		printf("(%s \n",tree->token);	
-		memcpy(end, endings[1], strlen(endings[1]));
-	}	
-			
-	else if(strcmp(tree->token, "STRING") == 0){
-		printf("(");
-		memcpy(end, endings[0], strlen(endings[0]));
-	}						
-
-	/* LEXICAL */
-	else if(strcmp(tree->token, "(") == 0){
-		printf("(");
-	}
-
-	else if(strcmp(tree->token, "\n") == 0){
-		printf("\n");
-	}
-
-	else if(strcmp(tree->token, ")") == 0){
-		printf(")\n");
-	}	
-
-	else if(strcmp(tree->token, ",") == 0){
-		printf(",");
-	}
-
-	else if(strcmp(tree->token, ";") == 0){
-		printf(";");
-	}
-
-
-	else if(strcmp(tree->token, "&&") == 0 || strcmp(tree->token, "/") == 0 || strcmp(tree->token, "==") == 0 ||
-		strcmp(tree->token, ">") == 0 || strcmp(tree->token, ">=") == 0 || 
-	strcmp(tree->token, "<") == 0 || strcmp(tree->token, "<=") == 0 || strcmp(tree->token, "-") == 0 || 
-	strcmp(tree->token, "!") == 0 || strcmp(tree->token, "!=") == 0 || strcmp(tree->token, "||") == 0 || 
-	strcmp(tree->token, "+") == 0 || strcmp(tree->token, "*") == 0 || strcmp(tree->token, "&") == 0 || 
-	strcmp(tree->token, "^") == 0 || strcmp(tree->token, "|") == 0 || strcmp(tree->token, ",") == 0 ){
-
-		
-		printf("\n");
-		CalcShift(shift);
-		printf("(%s ", tree->token);
-		memcpy(end, endings[2], strlen(endings[2]));
-	}
-
-	else if(strcmp(tree->token, "=") == 0) {
-		printf("(%s ", tree->token);
-		memcpy(end, endings[2], strlen(endings[2]));
-	}
-
-
-	else{
-		if(tree && (!tree->left && !tree->right)){
-			printf("%s ", tree->token);
-		}
-		else{
-			printf("%s ", tree->token);
-		}
-	}
-
-
-
-		
-	/* POST ORDER CALLS  */
-	if (tree->left) {
-		
-		CalcShift(shift);
-
-	 	TreePrint(tree->left);
-
-							
-		if(shift > 0 && insideBlock == 0) {
-			shift--;
-		}
-	}
+	}else if(strcmp(tree->token, "") == 0 ){
 	
-	if (tree->right){
-
-		CalcShift(shift);
-
-	 	TreePrint(tree->right);
-
-		if(shift> 0 && insideBlock == 0) {
-			shift--;
-		}
-	}
-
-	if(strcmp(end, "\n)") == 0){
-		printf("%s", end);
-		CalcShift(shift);
+	}else if(strcmp(tree->token, "NONE") == 0 ){
+		printf("NONE ");
 	}else{
-		CalcShift(shift);
-		printf("%s", end);
+		printf("%s ",tree->token);
 	}
+
 	
+	if(tree->left){
+		TreePrint(tree->left);
+	}
+
+	if(tree->right){
+		TreePrint(tree->right);
+		printf(")\n");
+	}
+
 	
 }
+
+
 
 
 node *mknode(char *token,node *left,node *right)
