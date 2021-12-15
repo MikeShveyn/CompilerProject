@@ -13,7 +13,6 @@
 		struct node *right;
 	} node;
 
-	char endings[3][3] ={")","\n)",")\n"}; 
 	node *mknode(char *token, node *left, node*right);
 	void TreePrint(node *tree);
 	void CalcShift(int t);
@@ -68,7 +67,7 @@ code:
 function:
 	   type VARIABLE_ID OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES   
 	   {
- 			 $$=mknode("FUNC", mknode($2,mknode("",NULL,NULL), mknode("",mknode("ARGS",$4, NULL) ,mknode("RET",$1, NULL))), mknode("BODY",$7,$8));
+ 			 $$=mknode("FUNC",mknode($2,mknode("\n",NULL,NULL), mknode("",mknode("ARGS",$4, NULL) ,mknode("RET",$1, NULL))) ,mknode("BODY",$7,$8));
 	   }
 	 
 	 | VOID VARIABLE_ID OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES 
@@ -80,7 +79,7 @@ function:
 parameter_list:
 	  argument SEMICOLON parameter_list  {$$=mknode("",$1,$3);}
 	| argument  {$$=mknode("",$1,NULL);}
-	| nothing {$$=mknode("NONE",$1,NULL);}
+	| nothing {$$=mknode("NONE)\n",$1,NULL);}
 	 ;
 
 argument: type atributeList {$$=mknode("ARG-TYPE",$1,$2);};
@@ -267,38 +266,46 @@ int main()
 
 void CalcShift(int t) {
 	for(int i= 0; i < t; i++){
-		printf(" ");
+		printf("	");
 	}
 }
 
 
 
 void TreePrint(node* tree){
-	if(strcmp(tree->token, "FUNC") == 0 || strcmp(tree->token, "BODY") == 0){
-		printf("(%s \n",tree->token);
+	if(strcmp(tree->token, "FUNC") == 0){
+		printf("(%s\n",tree->token);
 		shift++;
 		CalcShift(shift);
+	}else if(strcmp(tree->token, "BODY") == 0){
+		CalcShift(shift);
+		printf("(%s\n",tree->token);
+		shift++;	
+	}else if(strcmp(tree->token, "CODE") == 0 ){
+		CalcShift(shift);
+		printf("(%s\n",tree->token);
+		shift++;	
 	}else if(strcmp(tree->token, "ARGS") == 0 || strcmp(tree->token, "RET") == 0){
+		CalcShift(shift);
 		printf("(%s ",tree->token);
 	}else if(strcmp(tree->token, "") == 0 ){
 	
 	}else if(strcmp(tree->token, "NONE") == 0 ){
-		printf("NONE ");
+		printf("NONE");
 	}else{
-		printf("%s ",tree->token);
+		printf("%s",tree->token);
 	}
 
 	
 	if(tree->left){
 		TreePrint(tree->left);
 	}
+	
 
 	if(tree->right){
 		TreePrint(tree->right);
 		printf(")\n");
 	}
-
-	
 }
 
 
