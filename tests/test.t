@@ -1,4 +1,3 @@
-int goo(){
-    x = 2;
-    return 'a';
+char goo(){
+   return 'a';
 }
