@@ -2,7 +2,10 @@
 %{
 #include<stdio.h>
 #include "y.tab.h"
+int countn=0;
 %}
+
+%option yylineno
 
 %%
   /*TYPES*/
@@ -68,9 +71,12 @@ false {return BOOL_FALSE;}
 [-+]?[0-9]*\.?[0-9]*[eE]?[-+]?[0-9]+ {yylval.str= strdup(yytext); return REAL_LITERAL;}
 [a-zA-Z][a-zA-Z0-9_]* { yylval.str = strdup(yytext); return VARIABLE_ID;} 
 
-[\n] {yylineno++;}
+[\n] {countn++;}
 [ \t]+ ;
-
-. return yytext[0];
+.	                    { return *yytext; }
 %%
+
+int yywrap() {
+    return 1;
+}
 

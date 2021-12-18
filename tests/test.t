@@ -1,5 +1,4 @@
-void goo(int x,y){
-   if(x>3){
-
-   }
+void main() {
+    var int x = 2;
+    var int x;
 }
