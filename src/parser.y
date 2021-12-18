@@ -18,12 +18,9 @@
 	void CalcShift(int t); 
 	char *func_name=NULL;
 	int shift = 0;
-	int args_flag=0;
-	int ret_void_flag=0;
-	int func_flag = 0 ;
-	int body_done = 0;
-	int body_flag = 0;
 	int ret_flag = 0;	
+	int ret_val_flag=0;
+	int flag = 0;
 %}
 
 %union
@@ -91,8 +88,8 @@ parameter_list:
 argument: type atributeList {$$=mknode("ARGS-TYPE",$1,$2);};
 
 atributeList:
-	  VARIABLE_ID COMMA atributeList {$$=mknode($1,$3,NULL);};
-	| VARIABLE_ID {$$=mknode($1,NULL,NULL);};
+	VARIABLE_ID COMMA atributeList {$$=mknode($1,$3,NULL);};
+	|VARIABLE_ID {$$=mknode($1,mknode(")",NULL,NULL),NULL);};
 	;
 
 body: 
@@ -162,7 +159,7 @@ statment:
 	   | return  {$$=mknode("",$1,NULL);}
 	   | conditions {$$=mknode("",$1,NULL);}
 	   | loops {$$=mknode("",$1,NULL);}
-	   | code_block {$$=mknode("",$1,NULL);}
+	   | code_block {$$=mknode("CODE_BLOCK",$1,NULL);}
 	   ;
 
 code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES  {$$=mknode("CODE_BLOCK",$2,NULL);};
@@ -280,16 +277,16 @@ void CalcShift(int t) {
 
 void TreePrint(node* tree){
 	if(strcmp(tree->token, "FUNC") == 0){
-		func_flag = 1;
 		func_name=(char*)malloc(sizeof(tree->left->token) + 1);
 		strcpy(func_name,tree->left->token);
 		printf("(%s\n",tree->token);
 		shift++;
 		CalcShift(shift);
+		flag = 1;
 	}else if(strcmp(tree->token, "BODY") == 0){
 		CalcShift(shift);
 		printf("(%s",tree->token);
-		body_flag=1;
+		flag=1;
 	}else if(strcmp(tree->token, "CODE") == 0 ){
 		CalcShift(shift);
 		printf("(%s\n",tree->token);
@@ -299,7 +296,7 @@ void TreePrint(node* tree){
 		printf("(%s",tree->token);
 	}
 	else if(strcmp(tree->token,"RET-VAL")==0){
-		ret_flag=1;
+		ret_val_flag=1;
 		printf("\n");
 		shift++;
 		CalcShift(shift);
@@ -307,9 +304,9 @@ void TreePrint(node* tree){
 		shift--;
 	}
 	else if(strcmp(tree->token, "RET") == 0 || strcmp(tree->token, "RET VOID") == 0 ){
+		ret_flag=1;
 		CalcShift(shift);
 		printf("(%s",tree->token);
-		ret_void_flag = 1;
 	}
 	else if(strcmp(tree->token, "") == 0 ){
 	
@@ -318,28 +315,19 @@ void TreePrint(node* tree){
 		printf(" NONE");
 	}
 	else if(strcmp(tree->token,"ARGS-TYPE") == 0){
-		args_flag=1;
 		shift++;
 		printf("\n");
 		CalcShift(shift);
 		printf("(");
 		shift--;
 	}
-	else if(strcmp(tree->token,"IF") == 0){
+	else if(strcmp(tree->token,"IF") == 0||strcmp(tree->token,"CODE_BLOCK") == 0){
+		flag = 1;
 		shift++;
 		printf("\n");
 		CalcShift(shift);
-		printf("(IF");
+		printf("(%s",tree->token);
 		shift--;
-		
-	}
-	else if(strcmp(tree->token,"CODE_BLOCK") == 0){
-		shift++;
-		printf("\n");
-		CalcShift(shift);
-		printf("(CODE_BLOCK");
-		shift--;
-		
 	}
 	else if(strcmp(tree->token, "&&") == 0 || strcmp(tree->token, "/") == 0 || strcmp(tree->token, "==") == 0 ||
 		strcmp(tree->token, ">") == 0 || strcmp(tree->token, ">=") == 0 || 
@@ -347,11 +335,11 @@ void TreePrint(node* tree){
 	strcmp(tree->token, "!") == 0 || strcmp(tree->token, "!=") == 0 || strcmp(tree->token, "||") == 0 || 
 	strcmp(tree->token, "+") == 0 || strcmp(tree->token, "*") == 0 || strcmp(tree->token, "&") == 0 || 
 	strcmp(tree->token, "^") == 0 || strcmp(tree->token, "|") == 0 || strcmp(tree->token, ",") == 0 ){
-
-		
+		shift++;
 		printf("\n");
 		CalcShift(shift);
-		printf("(%s ", tree->token);
+		printf("(%s", tree->token);
+		shift--;
 	}
 	else if(strcmp(tree->token, "=") == 0) {
 		printf("\n");
@@ -361,49 +349,48 @@ void TreePrint(node* tree){
 	}
 	else{
 		printf(" %s",tree->token);
-		if(ret_flag==1){
+		if(ret_val_flag==1){
 			printf(")");
-			ret_flag = 0;
+			ret_val_flag=0;
 		}
 	}
 
 	if(tree->left){
 		TreePrint(tree->left);
 	}
-	
+
 
 	if(tree->right){
 		TreePrint(tree->right);
-		if(strcmp(tree->token,"FUNC")==0){
-			shift = 0;//code -> change to 1
-		}
-		if(body_flag == 1){
-			shift = 1;//code -> change to 2
-			printf("\n");
-			CalcShift(shift);
-			printf(")\n");
-			body_flag = 0;
+		if(strcmp(tree->token, "&&") == 0 || strcmp(tree->token, "/") == 0 || strcmp(tree->token, "==") == 0 ||
+			strcmp(tree->token, ">") == 0 || strcmp(tree->token, ">=") == 0 || 
+		strcmp(tree->token, "<") == 0 || strcmp(tree->token, "<=") == 0 || strcmp(tree->token, "-") == 0 || 
+		strcmp(tree->token, "!") == 0 || strcmp(tree->token, "!=") == 0 || strcmp(tree->token, "||") == 0 || 
+		strcmp(tree->token, "+") == 0 || strcmp(tree->token, "*") == 0 || strcmp(tree->token, "&") == 0 || 
+		strcmp(tree->token, "^") == 0 || strcmp(tree->token, "|") == 0 || strcmp(tree->token, ",") == 0){
+			printf(")");
 		}
 		else if (strcmp(func_name,tree->token)==0){
 			printf("\n");
 		}
-		else if(args_flag != 1 && func_flag != 1 && ret_void_flag != 1){
+		else if(flag == 1 && ret_flag != 1||strcmp("ARGS-TYPE",tree->token)==1)
+		{
+			if(strcmp(tree->token,"BODY") == 0){
+				shift = 1;//code -> change to 2
+			}
 			printf("\n");
 			CalcShift(shift);
 			printf(")\n");
+			flag=0;
 		}
 		else{
 			printf(")");
-			ret_void_flag=0;
-			args_flag = 0;
-			func_flag = 0;
+			ret_flag = 0;
 		}
 
 	}
+
 }
-
-
-
 
 node *mknode(char *token,node *left,node *right)
 {

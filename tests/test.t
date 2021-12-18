@@ -1,3 +1,5 @@
-char goo(){
-   return 'a';
+void goo(int x,y){
+   if(x>3){
+
+   }
 }
