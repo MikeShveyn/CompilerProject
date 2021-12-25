@@ -11,6 +11,8 @@
 	typedef struct node
 	{	
 		char *token;
+		char name[100]; 
+		char type[10];
 		struct node *left;
 		struct node *right;
 	} node;
@@ -56,8 +58,9 @@
 %union
 {
 	struct node *node;
-    char *str;
+	char *str; 
 }
+
 
 // TYPES 
 %token<str> BOOL CHAR CHAR_P INT INT_P REAL REAL_P STRING VOID
@@ -95,6 +98,7 @@ code:
 	   function code  { $$ = mknode("",$1, $2); }
 	 | function   { $$ = mknode("",$1, NULL);}
 	 ;  
+	 
 
  /* FUNCTION  */
 function:
@@ -118,7 +122,7 @@ parameter_list:
 argument: type atributeList {$$=mknode("ARGS-TYPE",$1,$2);};
 
 atributeList:
-	VARIABLE_ID COMMA atributeList {$$=mknode($1,$3,NULL);};
+	VARIABLE_ID  COMMA atributeList {$$=mknode($1,$3,NULL);};
 	|VARIABLE_ID {$$=mknode($1,mknode(")",NULL,NULL),NULL);};
 	;
 
@@ -170,39 +174,40 @@ variable_declaration:
 	  VAR  type  VARIABLE_ID {add('V');} temp 
 	  {
 		  $$ = mknode("VAR",$2, mknode($3, $5, NULL));
+	  
 
-		  int t = check_types($1.name, $4.type); 
+		  int t = check_types($2->name, $5->type); 
 	if(t>0) { 
 		if(t == 1) {
-			struct node *temp = mknode(NULL, $4.nd, "floattoint"); 
-			$$.nd = mknode($2.nd, temp, "declaration"); 
+			struct node *temp = mknode("floattoint", $5.node, NULL); 
+			$$.node = mknode("declaration", $2.node, temp); 
 		} 
 		else if(t == 2) { 
-			struct node *temp = mknode(NULL, $4.nd, "inttofloat"); 
-			$$.nd = mknode($2.nd, temp, "declaration"); 
+			struct node *temp = mknode( "inttofloat"$5->nd, NULL); 
+			$$.node = mknode( "declaration", $2->nd, temp); 
 		} 
 		else if(t == 3) { 
-			struct node *temp = mknode(NULL, $4.nd, "chartoint"); 
-			$$.nd = mknode($2.nd, temp, "declaration"); 
+			struct node *temp = mknode( "chartoint", $5->nd, NULL); 
+			$$.node = mknode("declaration", $2->nd, temp); 
 		} 
 		else if(t == 4) { 
-			struct node *temp = mknode(NULL, $4.nd, "inttochar"); 
-			$$.nd = mknode($2.nd, temp, "declaration"); 
+			struct node *temp = mknode( "inttochar", $5->nd NULL); 
+			$$.node = mknode("declaration", $2->nd, temp); 
 		} 
 		else if(t == 5) { 
-			struct node *temp = mknode(NULL, $4.nd, "chartofloat"); 
-			$$.nd = mknode($2.nd, temp, "declaration"); 
+			struct node *temp = mknode("chartofloat", $5->nd, NULL); 
+			$$.node = mknode( "declaration", $2->nd, temp); 
 		} 
 		else{
-			struct node *temp = mknode(NULL, $4.nd, "floattochar"); 
-			$$.nd = mknode($2.nd, temp, "declaration"); 
+			struct node *temp = mknode( "floattochar", $5->nd, NULL); 
+			$$.node = mknode("declaration", $2->nd, temp); 
 		}
 	} 
 	else { 
-		$$.nd = mknode($2.nd, $4.nd, "declaration"); 
-	} 
-}
-| ID { check_declaration($1.name); } '=' expression {
+		$$.nd = mknode( "declaration", $2->nd, $5->nd); 
+	}  
+
+/* | ID { check_declaration($1.name); } '=' expression {
 	$1.nd = mknode(NULL, NULL, $1.name); 
 	char *id_type = get_type($1.name); 
 	if(strcmp(id_type, $4.type)) {
@@ -243,14 +248,15 @@ variable_declaration:
 		$$.nd = mknode($1.nd, $4.nd, "="); 
 	}
 }
-| ID { check_declaration($1.name); } relop expression { $1.nd = mknode(NULL, NULL, $1.name); $$.nd = mknode($1.nd, $4.nd, $3.name); }
+| ID { check_declaration($1.name); } relop expression { $1.nd = mknode(NULL, NULL, $1.name); $$.nd = mknode($1.nd, $4.nd, $3.name); } */
 
-	  }
+	  } 
 	  ;
 
 temp:
 	 SEMICOLON {$$=mknode("",NULL,NULL);}
-	|ASSIGNMENT exp SEMICOLON {$$=mknode("",$2,NULL);}
+	|ASSIGNMENT exp SEMICOLON {$$=mknode("",$2,NULL); 
+	sprintf($$.type, $2.type);}
 	;
 
 string_array: STRING VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES SEMICOLON {$$=mknode($2,$4,NULL);} ;	 
@@ -304,7 +310,7 @@ return: RETURN { add('K'); } exp SEMICOLON { $$=mknode("RET-VAL",$3,NULL);} ;
  /* Expression */
 expressions: 
    exp COMMA expressions {$$=mknode("",$1,$3);}
- | exp {$$=mknode("",$1,NULL);}
+ | exp {$$=mknode("",$1,NULL); sprintf($$.type, $1.type); }
  | nothing {$$=mknode("",$1,NULL);}
  ;
 
@@ -321,7 +327,7 @@ exp:
 	| exp GREATER_EQL exp {$$=mknode(">=",$1,$3);}
     | exp OR exp {$$=mknode("||",$1,$3);}
 	| exp AND exp {$$=mknode("&&",$1,$3);}												
-	| primitiveType {$$=mknode("",$1, NULL);} 			
+	| primitiveType {$$=mknode("",$1, NULL); sprintf($$.type, $1.type} 			
 	| NOT exp {$$=mknode("!",$2,NULL);} 								
 	| VARIABLE_ID {$$=mknode($1,NULL,NULL);}											
 	| function_call {$$=mknode("function_call",$1,NULL);}	  							
@@ -354,14 +360,54 @@ type:
 	;
 
 primitiveType: 
-	 NONE {$$=mknode("None",NULL,NULL); add('C');} 
-	 |BOOL_TRUE {$$=mknode("True",NULL,NULL); add('K'); } 
-	 |BOOL_FALSE  {$$=mknode("False",NULL,NULL); add('K'); } 
-	 | CHAR_LITERAL {$$=mknode($1,NULL,NULL); add('C');} 
-	 | DECIMAL_LITERAL  {$$=mknode($1,NULL,NULL); add('C');} 
-	 | HEX_LITERAL {$$=mknode($1,NULL,NULL); add('C');} 
-	 | REAL_LITERAL  {$$=mknode($1,NULL,NULL); add('C');} 
-	 | STRING_LITERAL {$$=mknode($1,NULL,NULL); add('C');} 
+	 NONE 
+	 {
+		 sprintf($$.type, "NONE");
+		 $$=mknode("None",NULL,NULL);
+		  add('C');
+	 } 
+	 |BOOL_TRUE 
+	 {
+		 sprintf($$.type, "BOOL");
+		 $$=mknode("True",NULL,NULL);
+		 add('K');
+	  } 
+	 |BOOL_FALSE 
+	  {
+		 sprintf($$.type, "BOOL");
+		 $$=mknode("False",NULL,NULL); 
+		 add('K'); 
+	  } 
+	 | CHAR_LITERAL 
+	 {
+		 sprintf($$.type, "CHAR");
+		 $$=mknode($1,NULL,NULL);
+		  add('C');
+	 } 
+	 | DECIMAL_LITERAL  
+	 {
+		sprintf($$.type, "INT");
+		$$=mknode($1,NULL,NULL); 
+		add('C');
+	 } 
+	 | HEX_LITERAL 
+	 {
+		 sprintf($$.type, "REAL");
+		 $$=mknode($1,NULL,NULL);
+		  add('C');
+	 } 
+	 | REAL_LITERAL  
+	 {
+		 sprintf($$.type, "REAL");
+		 $$=mknode($1,NULL,NULL);
+		  add('C');
+	 } 
+	 | STRING_LITERAL 
+	 {
+		 sprintf($$.type, "CHAR_P");
+		 $$=mknode($1,NULL,NULL);
+		  add('C');
+	 } 
 	 ;
 
 integer_literal:
@@ -370,6 +416,7 @@ integer_literal:
 	 ;
 
 nothing:  {$$=NULL;}; 
+
 
 
 %%
@@ -381,28 +428,39 @@ int main() {
 	printf("\nSYMBOL   DATATYPE   TYPE   LINE NUMBER \n");
 	printf("_______________________________________\n\n");
 	int i=0;
+	int flag = 0;
 	for(i=0; i<count; i++) {
 		printf("%s\t%s\t%s\t%d\t\n", symbol_table[i].id_name, symbol_table[i].data_type, symbol_table[i].type, symbol_table[i].line_no);
+		if(strcmp(symbol_table[i].id_name, "main") == 0){
+			flag = 1;
+		}
 	}
 	for(i=0;i<count;i++) {
 		free(symbol_table[i].id_name);
 		free(symbol_table[i].type);
 	}
-	printf("\n\n");
-	printf("\t\t\t\t\t\t\t\t PHASE 2: SYNTAX ANALYSIS \n\n");
-	/* print_tree(head);  */
-	TreePrint(head);
-	printf("\n\n\n\n");
-	printf("\t\t\t\t\t\t\t\t PHASE 3: SEMANTIC ANALYSIS \n\n");
-	if(sem_errors>0) {
-		printf("Semantic analysis completed with %d errors\n", sem_errors);
-		for(int i=0; i<sem_errors; i++){
-			printf("\t - %s", errors[i]);
+
+	if(flag == 1) {
+		printf("\n\n");
+		printf("\t\t\t\t\t\t\t\t PHASE 2: SYNTAX ANALYSIS \n\n");
+		TreePrint(head);
+		printf("\n\n\n\n");
+		printf("\t\t\t\t\t\t\t\t PHASE 3: SEMANTIC ANALYSIS \n\n");
+		if(sem_errors>0) {
+			printf("Semantic analysis completed with %d errors\n", sem_errors);
+			for(int i=0; i<sem_errors; i++){
+				printf("\t - %s", errors[i]);
+			}
+		} else {
+			printf("Semantic analysis completed with no errors");
 		}
-	} else {
-		printf("Semantic analysis completed with no errors");
+		printf("\n\n");
+	}else{
+		printf("\n\n");
+		printf("Semantic analysis completed with error , main function requared");
+		printf("\n\n");
 	}
-	printf("\n\n");
+	
 }
 
 int search(char *type) {
@@ -438,23 +496,23 @@ void check_return_type(char *value) {
 
 int check_types(char *type1, char *type2){
 	// declaration with no init
-	if(!strcmp(type2, "null"))
+	if(!strcmp(type2, "NONE"))
 		return -1;
 	// both datatypes are same
 	if(!strcmp(type1, type2))
 		return 0;
 	// both datatypes are different
-	if(!strcmp(type1, "int") && !strcmp(type2, "real"))
+	if(!strcmp(type1, "INT") && !strcmp(type2, "REAL"))
 		return 1;
-	if(!strcmp(type1, "real") && !strcmp(type2, "int"))
+	if(!strcmp(type1, "REAL") && !strcmp(type2, "INT"))
 		return 2;
-	if(!strcmp(type1, "int") && !strcmp(type2, "char"))
+	if(!strcmp(type1, "INT") && !strcmp(type2, "CHAR"))
 		return 3;
-	if(!strcmp(type1, "char") && !strcmp(type2, "int"))
+	if(!strcmp(type1, "CHAR") && !strcmp(type2, "INT"))
 		return 4;
-	if(!strcmp(type1, "real") && !strcmp(type2, "char"))
+	if(!strcmp(type1, "REAL") && !strcmp(type2, "CHAR"))
 		return 5;
-	if(!strcmp(type1, "char") && !strcmp(type2, "real"))
+	if(!strcmp(type1, "CHAR") && !strcmp(type2, "REAL"))
 		return 6;
 }
 
@@ -508,7 +566,7 @@ void add(char c) {
 			count++;
 		}
     }
-    else if(c == 'V' && q) {
+    else if((c == 'V' || c =='F') && q) {
         sprintf(errors[sem_errors], "Line %d: Multiple declarations of \"%s\" not allowed!\n", countn+1, yytext);
 		sem_errors++;
     }
