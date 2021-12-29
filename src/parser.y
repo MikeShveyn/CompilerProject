@@ -50,16 +50,17 @@
     };
 
 	struct scopeStack {
-		char scope_name[10] ;
+		char * scope_name;
+		int last_index;
 		struct dataType symbol_table[40];
-	} scopeStack[40][60];
+	} scopeStack[40];
 
-	int count_scope_stack_elements = 0;
+	int count_scope_stack_elements = -1;
     int count_symbol_table_line=0;
 	int count_code_lines = 0;
     int q;
     char type[10];
-    extern int count_line = 0;
+    int count_line = 0;
 
 %}
 
@@ -350,28 +351,28 @@ int main() {
     yyparse();
     printf("\n\n");
 	printf("\t\t\t\t\t\t\t\t PHASE 1: LEXICAL ANALYSIS \n\n");
-	printf("\nSYMBOL   DATATYPE   TYPE   LINE NUMBER \n");
+	printf("\nSYMBOL   DATATYPE   TYPE   LINE NUMBER  SCOPE\n");
 	printf("_______________________________________\n\n");
 	int i,j=0;
 	int flag = 0;
-
-	for(j = 0; j < count_scope_stack_elements; j++){
+	for(j = 0; j <= count_scope_stack_elements; j++){
 		for(i=0; i < count_symbol_table_line; i++) {
 
 			printf("%s\t%s\t%s\t%d\t%s\t\n",
-			 scopeStack[j]->symbol_table[i].id_name, 
-			 scopeStack[j]->symbol_table[i].data_type,
-			 scopeStack[j]->symbol_table[i].type,
-			 scopeStack[j]->symbol_table[i].line_no,
-			 scopeStack[j]->scope_name);
+			 scopeStack[j].symbol_table[i].id_name, 
+			 scopeStack[j].symbol_table[i].data_type,
+			 scopeStack[j].symbol_table[i].type,
+			 scopeStack[j].symbol_table[i].line_no,
+			 scopeStack[j].scope_name);
 
-			if(strcmp(scopeStack[j]->symbol_table[i].id_name, "main") == 0){
+
+			if(strcmp(scopeStack[j].symbol_table[i].id_name, "main") == 0){
 				flag = 1;
 			}
 		}
 	}
 
-	freeStack();
+
 
 	if(flag == 1) {
 		printf("\n\n");
@@ -393,14 +394,16 @@ int main() {
 		printf("Semantic analysis completed with error , main function requared");
 		printf("\n\n");
 	}
+
+	freeStack();
 	
 }
 
 int search(char *type) {
 	int i;
 	for(i=count_symbol_table_line-1; i>=0; i--) {
-		if(strcmp(scopeStack[count_scope_stack_elements]->symbol_table[i].type, "Function")==0 || strcmp(scopeStack[count_scope_stack_elements]->symbol_table[i].type, "Variable")==0){
-			if(strcmp(scopeStack[count_scope_stack_elements]->symbol_table[i].id_name, type)==0) {
+		if(strcmp(scopeStack[count_scope_stack_elements].symbol_table[i].type, "Function")==0 || strcmp(scopeStack[count_scope_stack_elements].symbol_table[i].type, "Variable")==0){
+			if(strcmp(scopeStack[count_scope_stack_elements].symbol_table[i].id_name, type)==0) {
 				return -1;
 				break;
 			}
@@ -455,8 +458,8 @@ int check_types(char *type1, char *type2){
 char *get_type(char *var){
 	for(int i=0; i<count_symbol_table_line; i++) {
 		// Handle case of use before declaration
-		if(!strcmp(scopeStack[count_scope_stack_elements]->symbol_table[i].id_name, var)) {
-			return scopeStack[count_scope_stack_elements]->symbol_table[i].data_type;
+		if(!strcmp(scopeStack[count_scope_stack_elements].symbol_table[i].id_name, var)) {
+			return scopeStack[count_scope_stack_elements].symbol_table[i].data_type;
 		}
 	}
 }
@@ -474,43 +477,44 @@ void add(char c) {
     q=search(yytext);
 	if(!q) {
 		if(c == 'K') {
-			count_symbol_table_line = 0;
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].id_name=strdup(yytext);
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].data_type=strdup("N/A");
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].line_no=count_line;
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].type=strdup("Keyword\t");
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].data_type=strdup("N/A");
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].line_no=count_line;
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].type=strdup("Keyword\t");
 			count_symbol_table_line++;
 			count_line++;
 			set_current_scope(yytext);
 		}
 		
 		else if(c == 'V') {
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].id_name=strdup(yytext);
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].data_type=strdup(type);
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].line_no=count_line;
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].type=strdup("Variable");
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].data_type=strdup(type);
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].line_no=count_line;
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].type=strdup("Variable");
 			count_symbol_table_line++;
-			count_line++;
 		}
 
 		else if(c == 'C') {
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].id_name=strdup(yytext);
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].data_type=strdup("CONST");
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].line_no=count_line;
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].type=strdup("Constant");
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].data_type=strdup("CONST");
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].line_no=count_line;
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].type=strdup("Constant");
 			count_symbol_table_line++;
 			count_line++;
 		}
 
 		else if(c == 'F') {
-			count_symbol_table_line = 0;
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].id_name=strdup(yytext);
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].data_type=strdup(type);
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].line_no=count_line;
-			scopeStack[count_scope_stack_elements]->symbol_table[count_symbol_table_line].type=strdup("Function");
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].data_type=strdup(type);
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].line_no=count_line;
+			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].type=strdup("Function");
 			count_symbol_table_line++;
 			count_line++;
-			set_current_scope(yytext);
+
+			if(strcmp(yytext, "main") != 0){
+				set_current_scope(yytext);
+			}
+		
 		}
     }
     else if((c == 'V' || c =='F') && q) {
@@ -525,7 +529,10 @@ void insert_type() {
 
 void set_current_scope(const char* scope) {
 	count_scope_stack_elements++;
-	strcpy(scopeStack[count_scope_stack_elements]->scope_name, scope);
+	scopeStack[count_scope_stack_elements].scope_name = strdup(scope);
+	scopeStack[count_scope_stack_elements].last_index = 0;
+	count_symbol_table_line = 0;
+
 }
 
 void yyerror(const char* msg) {
@@ -534,12 +541,13 @@ void yyerror(const char* msg) {
 
 void freeStack() {
  int i,j = 0;	
- for(j = 0; i< count_scope_stack_elements; i++){
-	 for(i=0;i<count_symbol_table_line;i++) {
-		free(scopeStack[j]->symbol_table[i].id_name);
-		free(scopeStack[j]->symbol_table[i].type);
-		free(scopeStack[j]->symbol_table[i].data_type);
+ for(j = 0; i <= count_scope_stack_elements; i++){
+	 for(i=0; i < count_symbol_table_line;i++) {
+		free(scopeStack[j].symbol_table[i].id_name);
+		free(scopeStack[j].symbol_table[i].type);
+		free(scopeStack[j].symbol_table[i].data_type);
 	}
+	free(scopeStack[j].scope_name);
  }		
 }
 

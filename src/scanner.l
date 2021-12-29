@@ -66,7 +66,7 @@ true {return BOOL_TRUE;}
 false {return BOOL_FALSE;}
 \'.\' {yylval.str= strdup(yytext); return CHAR_LITERAL;}
 "\""[^"]*"\"" {yylval.str = strdup(yytext); return STRING_LITERAL;}
-[+-]?[1-9][0-9]*|[0-9] {yylval.str= strdup(yytext); return DECIMAL_LITERAL;}
+[+-]?[1-9][0-9]*|[0-9] {yylval.str = strdup(yytext); return DECIMAL_LITERAL;}
 0(x|X)[0-9A-F]+ {yylval.str= strdup(yytext); return HEX_LITERAL;}
 [-+]?[0-9]*\.?[0-9]*[eE]?[-+]?[0-9]+ {yylval.str= strdup(yytext); return REAL_LITERAL;}
 [a-zA-Z][a-zA-Z0-9_]* { yylval.str = strdup(yytext); return VARIABLE_ID;} 
