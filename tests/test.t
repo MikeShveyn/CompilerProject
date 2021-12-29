@@ -1,11 +1,12 @@
 void main() {
     
-    void func() {
-        var int x = 2;
+    var int x = 2;
+
+    void check() {
+        var int y = 4;
     }
 
     var int x = 2;
-
 }
 
 

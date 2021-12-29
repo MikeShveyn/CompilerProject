@@ -36,6 +36,7 @@
 	int check_types(char *, char *);
 	char *get_type(char *);
 	void set_current_scope(const char *);
+	void endScope();
 	int sem_errors=0;
 	int label=0;
 	char buff[100];
@@ -55,7 +56,8 @@
 		struct dataType symbol_table[40];
 	} scopeStack[40];
 
-	int count_scope_stack_elements = -1;
+	int count_scope_stack_elements = 0;
+	int current_scope_stack_top = -1;
     int count_symbol_table_line=0;
 	int count_code_lines = 0;
     int q;
@@ -110,12 +112,12 @@ code:
 
  /* FUNCTION  */
 function:
-	   type VARIABLE_ID {add('F');} OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES   
+	   type VARIABLE_ID {add('F');} OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES {endScope();}  
 	   {
  			 $$=mknode("FUNC",mknode($2,mknode("\n",NULL,NULL), mknode("",mknode("ARGS",$5, NULL) ,mknode("RET",$1, NULL))) ,mknode("BODY",$8,$9));
 	   }
 	 
-	 | VOID VARIABLE_ID {add('F');}  OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES 
+	 | VOID VARIABLE_ID {add('F');}  OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES {endScope();}
 		{
 			 $$=mknode("FUNC", mknode($2,mknode("\n",NULL,NULL), mknode("",mknode("ARGS",$5, NULL) ,mknode("RET VOID",NULL, NULL))), mknode("BODY",$8,NULL));
 		}
@@ -215,7 +217,7 @@ statment:
 	   | code_block {$$=mknode("CODE_BLOCK",$1,NULL);}
 	   ;
 
-code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES  {$$=mknode("CODE_BLOCK",$2,NULL);};
+code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES {endScope();}  {$$=mknode("CODE_BLOCK",$2,NULL);};
 
 conditions: 
 	 	IF {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block ELSE {add('K');} code_block { $$=mknode("IF-ELSE", mknode("",$4,$6), mknode("",$9,NULL));}
@@ -224,7 +226,7 @@ conditions:
 
 loops:
 	  WHILE {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block {  $$=mknode("WHILE",$4,$6);}
-	| DO  code_block WHILE {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES SEMICOLON{  $$=mknode("DO-WHILE",$2,$6);}
+	| DO {add('K');} code_block WHILE  OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES SEMICOLON{  $$=mknode("DO-WHILE",$3,$6);}
 	| FOR {add('K');} OPEN_ANGLE_BRACES init SEMICOLON exp SEMICOLON update CLOSE_ANGLE_BRACES code_block { $$=mknode("FOR",mknode("INIT", $4, mknode("COND", $6, mknode("UPDATE",$8, NULL))),$10);}
 	;  
 
@@ -355,16 +357,15 @@ int main() {
 	printf("_______________________________________\n\n");
 	int i,j=0;
 	int flag = 0;
-	for(j = 0; j <= count_scope_stack_elements; j++){
-		for(i=0; i < count_symbol_table_line; i++) {
-
+	for(j = 0; j < count_scope_stack_elements; j++){
+		int temp = scopeStack[j].last_index;
+		for(i=0; i < temp; i++) {
 			printf("%s\t%s\t%s\t%d\t%s\t\n",
 			 scopeStack[j].symbol_table[i].id_name, 
 			 scopeStack[j].symbol_table[i].data_type,
 			 scopeStack[j].symbol_table[i].type,
 			 scopeStack[j].symbol_table[i].line_no,
 			 scopeStack[j].scope_name);
-
 
 			if(strcmp(scopeStack[j].symbol_table[i].id_name, "main") == 0){
 				flag = 1;
@@ -395,15 +396,15 @@ int main() {
 		printf("\n\n");
 	}
 
-	freeStack();
+	//freeStack();
 	
 }
 
 int search(char *type) {
 	int i;
 	for(i=count_symbol_table_line-1; i>=0; i--) {
-		if(strcmp(scopeStack[count_scope_stack_elements].symbol_table[i].type, "Function")==0 || strcmp(scopeStack[count_scope_stack_elements].symbol_table[i].type, "Variable")==0){
-			if(strcmp(scopeStack[count_scope_stack_elements].symbol_table[i].id_name, type)==0) {
+		if(strcmp(scopeStack[current_scope_stack_top].symbol_table[i].type, "Function")==0 || strcmp(scopeStack[current_scope_stack_top].symbol_table[i].type, "Variable")==0){
+			if(strcmp(scopeStack[current_scope_stack_top].symbol_table[i].id_name, type)==0) {
 				return -1;
 				break;
 			}
@@ -458,8 +459,8 @@ int check_types(char *type1, char *type2){
 char *get_type(char *var){
 	for(int i=0; i<count_symbol_table_line; i++) {
 		// Handle case of use before declaration
-		if(!strcmp(scopeStack[count_scope_stack_elements].symbol_table[i].id_name, var)) {
-			return scopeStack[count_scope_stack_elements].symbol_table[i].data_type;
+		if(!strcmp(scopeStack[current_scope_stack_top].symbol_table[i].id_name, var)) {
+			return scopeStack[current_scope_stack_top].symbol_table[i].data_type;
 		}
 	}
 }
@@ -477,38 +478,45 @@ void add(char c) {
     q=search(yytext);
 	if(!q) {
 		if(c == 'K') {
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].data_type=strdup("N/A");
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].line_no=count_line;
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].type=strdup("Keyword\t");
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup("N/A");
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].line_no=count_line;
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].type=strdup("Keyword\t");
 			count_symbol_table_line++;
+			scopeStack[current_scope_stack_top].last_index = count_symbol_table_line;
 			count_line++;
 			set_current_scope(yytext);
 		}
 		
 		else if(c == 'V') {
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].data_type=strdup(type);
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].line_no=count_line;
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].type=strdup("Variable");
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup(type);
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].line_no=count_line;
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].type=strdup("Variable");
 			count_symbol_table_line++;
+			scopeStack[current_scope_stack_top].last_index = count_symbol_table_line;
 		}
 
 		else if(c == 'C') {
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].data_type=strdup("CONST");
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].line_no=count_line;
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].type=strdup("Constant");
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup("CONST");
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].line_no=count_line;
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].type=strdup("Constant");
 			count_symbol_table_line++;
+			scopeStack[current_scope_stack_top].last_index = count_symbol_table_line;
 			count_line++;
 		}
 
 		else if(c == 'F') {
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].data_type=strdup(type);
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].line_no=count_line;
-			scopeStack[count_scope_stack_elements].symbol_table[count_symbol_table_line].type=strdup("Function");
+
+			printf("%s", yytext);
+
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup(type);
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].line_no=count_line;
+			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].type=strdup("Function");
 			count_symbol_table_line++;
+			scopeStack[current_scope_stack_top].last_index = count_symbol_table_line;
 			count_line++;
 
 			if(strcmp(yytext, "main") != 0){
@@ -528,11 +536,19 @@ void insert_type() {
 }
 
 void set_current_scope(const char* scope) {
+	current_scope_stack_top++;
 	count_scope_stack_elements++;
-	scopeStack[count_scope_stack_elements].scope_name = strdup(scope);
-	scopeStack[count_scope_stack_elements].last_index = 0;
+	scopeStack[current_scope_stack_top].scope_name = strdup(scope);
+	scopeStack[current_scope_stack_top].last_index = 0;
 	count_symbol_table_line = 0;
+}
 
+
+void endScope() {
+	printf("%s %d", yytext,count_symbol_table_line);
+	current_scope_stack_top--;
+	count_symbol_table_line = scopeStack[current_scope_stack_top].last_index;
+	
 }
 
 void yyerror(const char* msg) {
@@ -541,7 +557,7 @@ void yyerror(const char* msg) {
 
 void freeStack() {
  int i,j = 0;	
- for(j = 0; i <= count_scope_stack_elements; i++){
+ for(j = 0; i < count_scope_stack_elements; i++){
 	 for(i=0; i < count_symbol_table_line;i++) {
 		free(scopeStack[j].symbol_table[i].id_name);
 		free(scopeStack[j].symbol_table[i].type);
