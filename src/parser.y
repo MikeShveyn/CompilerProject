@@ -8,6 +8,7 @@
 	void yyerror(const char* msg);
 	int yywrap();
 
+
 	typedef struct node
 	{	
 		char *token;
@@ -25,7 +26,7 @@
 	int ret_flag = 0;	
 	int ret_val_flag=0;
 	int flag = 0;
-
+	int mulltipleMain = 0;
 	/*  Semantic  */
 	void freeStack();
 	void add(char);
@@ -36,9 +37,13 @@
 	void check_return_type(char *);
 	int check_types(char *, char *);
 	char *get_type(char *);
-	void set_current_scope(const char *);
+	void set_current_scope(const char *, int is_func);
+	void add_to_param_count();
+	void set_param_count(const char * name);
+	void check_param_list(const char *);
 	void endScope();
 	int sem_errors=0;
+	int param_count_current = 0;
 	int label=0;
 	char buff[100];
 	char errors[10][100];
@@ -54,6 +59,9 @@
 	struct scopeStack {
 		char * scope_name;
 		int last_index;
+		char * param_types;
+		int param_count;
+		int is_function;
 		struct dataType symbol_table[40];
 	} scopeStack[40];
 
@@ -62,8 +70,8 @@
     int count_symbol_table_line=0;
 	int count_code_lines = 0;
     int q;
-    char type[10];
     int count_line = 0;
+	char type[10];
 
 %}
 
@@ -89,7 +97,7 @@
 // NODES FUNCTIONS 
 %type<node> program code function exp expressions parameter_list body_func body return  primitiveType argument nothing statment_func declaration
 %type<node> nested_declarations nested_statments nested_statments_func type code_block function_call assignment_statement conditions loops lhs statment
-%type<node> init update integer_literal variable_declaration variableL atributeList string_exp string_array temp
+%type<node> init update integer_literal variable_declaration variableL atributeList string_exp string_array temp function_call_params function_lhs
 
 
 
@@ -103,14 +111,13 @@
 
 
 %%
-program: code {head = $1;};
+program:  code {head = $1;};
 
 code:
 	   function code  { $$ = mknode("",$1, $2); }
 	 | function   { $$ = mknode("",$1, NULL);}
 	 ;  
 	 
-
  /* FUNCTION  */
 function:
 	   type VARIABLE_ID {add('F');} OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES  OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES {endScope();}  
@@ -133,8 +140,8 @@ parameter_list:
 argument: type atributeList {$$=mknode("ARGS-TYPE",$1,$2);};
 
 atributeList:
-	 VARIABLE_ID  COMMA atributeList {$$=mknode($1,$3,NULL);}
-	|VARIABLE_ID {$$=mknode($1,mknode(")",NULL,NULL),NULL);}
+	 VARIABLE_ID  COMMA atributeList {add_to_param_count(); $$=mknode($1,$3,NULL);}
+	|VARIABLE_ID {add_to_param_count(); $$=mknode($1,mknode(")",NULL,NULL),NULL);}
 	;
 
 body: 
@@ -169,7 +176,17 @@ statment_func:
 	   ;
 
 
-function_call: lhs OPEN_ANGLE_BRACES expressions  CLOSE_ANGLE_BRACES SEMICOLON {$$=mknode("FUNCTION_CALL",$1,$3);};
+function_call: function_lhs OPEN_ANGLE_BRACES function_call_params  CLOSE_ANGLE_BRACES SEMICOLON { $$=mknode("FUNCTION_CALL",$1,$3);};
+
+function_call_params :
+		  VARIABLE_ID {check_declaration($1); check_param_list($1);} function_call_params  { $$=mknode("$1",$3, NULL);}
+		| VARIABLE_ID {check_declaration($1); check_param_list($1); $$=mknode("$1",NULL, NULL);}
+		;
+
+function_lhs:
+	   VARIABLE_ID  {check_declaration($1); set_param_count($1); $$=mknode($1,NULL,NULL);}
+	 | VARIABLE_ID {check_declaration($1); set_param_count($1); }  OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode($1,$4,NULL);}
+	 ;
 
  /* Declarations  */
 nested_declarations:
@@ -269,7 +286,7 @@ exp:
 	| exp AND exp {$$=mknode("&&",$1,$3);}												
 	| primitiveType {$$=mknode("",$1, NULL);} 			
 	| NOT exp {$$=mknode("!",$2,NULL);} 								
-	| VARIABLE_ID {check_declaration($1); $$=mknode($1,NULL,NULL);}											
+	| VARIABLE_ID {check_declaration($1);  $$=mknode($1,NULL,NULL);}											
 	| function_call {$$=mknode("function_call",$1,NULL);}	  							
 	| LENGTH VARIABLE_ID LENGTH {$$=mknode($2,NULL,NULL);}	 									
 	| OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES {$$=mknode("exp",$2,NULL);}																
@@ -288,14 +305,14 @@ string_exp:
 
  /* TYPES */
 type: 
-	  BOOL { insert_type(); $$=mknode("BOOL",NULL,NULL);} 
-	| CHAR {$$=mknode("CHAR",NULL,NULL); insert_type();} 
-	| CHAR_P {$$=mknode("CHAR_P",NULL,NULL); insert_type();} 
-	| INT { insert_type(); $$=mknode("INT",NULL,NULL);} 
-	| INT_P {$$=mknode("INT_P",NULL,NULL); insert_type();} 
-	| REAL {$$=mknode("REAL",NULL,NULL); insert_type();} 
-	| REAL_P {$$=mknode("REAL_P",NULL,NULL); insert_type();} 
-	| STRING {$$=mknode("STRING",NULL,NULL); insert_type();} 
+	  BOOL { insert_type("BOOL"); $$=mknode("BOOL",NULL,NULL);} 
+	| CHAR {$$=mknode("CHAR",NULL,NULL); insert_type("CHAR");} 
+	| CHAR_P {$$=mknode("CHAR_P",NULL,NULL); insert_type("CHAR_P");} 
+	| INT { insert_type("INT"); $$=mknode("INT",NULL,NULL);} 
+	| INT_P {$$=mknode("INT_P",NULL,NULL); insert_type("INT_P");} 
+	| REAL {$$=mknode("REAL",NULL,NULL); insert_type("REAL");} 
+	| REAL_P {$$=mknode("REAL_P",NULL,NULL); insert_type("REAL_P");} 
+	| STRING {$$=mknode("STRING",NULL,NULL); insert_type("STRING");} 
 	;
 
 primitiveType: 
@@ -353,7 +370,7 @@ nothing:  {$$=NULL;};
 %%
 
 int main() {
-	set_current_scope("main");
+	set_current_scope("global", 0);
     yyparse();
     printf("\n\n");
 	printf("\t\t\t\t\t\t\t\t PHASE 1: LEXICAL ANALYSIS \n\n");
@@ -515,7 +532,7 @@ void add(char c) {
 			count_symbol_table_line++;
 			scopeStack[current_scope_stack_top].last_index = count_symbol_table_line;
 			count_line++;
-			set_current_scope(yytext);
+			set_current_scope(yytext, 0);
 		}
 		
 		else if(c == 'V') {
@@ -542,6 +559,12 @@ void add(char c) {
 		else if(c == 'F') {
 
 			printf("%s\n", yytext);
+			if(strcmp(yytext, "main") == 0 && mulltipleMain == 1){
+				sprintf(errors[sem_errors], "Line %d: mulltiple main declaration !\n", count_line+1);
+				sem_errors++;
+				return;
+			}
+				
 
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup(type);
@@ -551,11 +574,13 @@ void add(char c) {
 			scopeStack[current_scope_stack_top].last_index = count_symbol_table_line;
 			count_line++;
 
-			if(strcmp(yytext, "main") != 0){
-				set_current_scope(yytext);
+			if (strcmp(yytext, "main")== 0) {
+				mulltipleMain = 1;
 			}
-		
+
+			set_current_scope(yytext, 1);
 		}
+	
     }
     else if((c == 'V' || c =='F') && q) {
         sprintf(errors[sem_errors], "Line %d: Multiple declarations of \"%s\" not allowed!\n", count_line+1, yytext);
@@ -563,15 +588,48 @@ void add(char c) {
     }
 }
 
-void insert_type() {
-	strcpy(type, yytext);
+void insert_type(const char* scope) {
+
+	strcpy(type, scope);
+
+	/* if(scopeStack[current_scope_stack_top].is_function == 1) {
+
+	} */
+
 }
 
-void set_current_scope(const char* scope) {
+
+void add_to_param_count() {
+	scopeStack[current_scope_stack_top].param_count ++;
+
+}
+
+void set_param_count(const char * name) {
+	int i;
+	for( i = current_scope_stack_top - 1; i >=0; i--) {
+		if(strcmp(scopeStack[i].scope_name, name) == 0) {
+			param_count_current = scopeStack[i].param_count;
+		}
+	
+	}
+}
+
+void check_param_list(const char * var_name) {
+	if(param_count_current > 0) {
+		 param_count_current--;
+	}else {
+		 sprintf(errors[sem_errors], "Line %d: Function attribute list not matched \n", count_line+1);
+		 sem_errors++;
+	}
+}
+
+void set_current_scope(const char* scope, int is_func) {
 	current_scope_stack_top++;
 	count_scope_stack_elements++;
 	scopeStack[current_scope_stack_top].scope_name = strdup(scope);
 	scopeStack[current_scope_stack_top].last_index = 0;
+	scopeStack[current_scope_stack_top].param_count = 0;
+	scopeStack[current_scope_stack_top].is_function = is_func;
 	count_symbol_table_line = 0;
 }
 
@@ -585,6 +643,7 @@ void endScope() {
 
 void yyerror(const char* msg) {
     fprintf(stderr, "%s\n", msg);
+
 }
 
 void freeStack() {
