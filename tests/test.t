@@ -1,12 +1,12 @@
-void main() {
-    
-    var int x = 2;
+void main()
+{   
+    void check(int a){
 
-    void check() {
-        var int y = 4;
     }
 
-    var int x = 2;
+    check();
+
 }
+
 
 

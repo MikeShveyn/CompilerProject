@@ -32,6 +32,7 @@
     void insert_type();
     int search(char *);
 	 void check_declaration(char *);
+	 int searchForDeclaration(char *type);
 	void check_return_type(char *);
 	int check_types(char *, char *);
 	char *get_type(char *);
@@ -132,12 +133,13 @@ parameter_list:
 argument: type atributeList {$$=mknode("ARGS-TYPE",$1,$2);};
 
 atributeList:
-	VARIABLE_ID  COMMA atributeList {$$=mknode($1,$3,NULL);};
-	|VARIABLE_ID {$$=mknode($1,mknode(")",NULL,NULL),NULL);};
+	 VARIABLE_ID  COMMA atributeList {$$=mknode($1,$3,NULL);}
+	|VARIABLE_ID {$$=mknode($1,mknode(")",NULL,NULL),NULL);}
 	;
 
 body: 
-	  nested_declarations nested_statments {$$=mknode("",$1,$2);}
+	  nested_declarations body {$$=mknode("",$1,$2);}
+	| nested_statments body {$$=mknode("",$1,$2);}
 	| nested_declarations {$$=mknode("",$1, NULL);}
 	| nested_statments {$$=mknode("",$1,NULL);}
 	| nothing {$$=mknode("",$1,NULL);}
@@ -145,7 +147,8 @@ body:
 	;
 
 body_func: 
- 	  nested_declarations nested_statments_func {$$=mknode("",$1,$2);}
+ 	  nested_declarations body_func {$$=mknode("",$1,$2);}
+	| nested_statments_func body_func {$$=mknode("",$1,$2);}
 	| nested_declarations  {$$=mknode("",$1, NULL);}
 	| nested_statments_func {$$=mknode("",$1,NULL);}
 	| nothing  {$$=mknode("",$1,NULL);}
@@ -217,11 +220,12 @@ statment:
 	   | code_block {$$=mknode("CODE_BLOCK",$1,NULL);}
 	   ;
 
-code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES {endScope();}  {$$=mknode("CODE_BLOCK",$2,NULL);};
+code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES {endScope(); $$=mknode("CODE_BLOCK",$2,NULL);};
 
 conditions: 
-	 	IF {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block ELSE {add('K');} code_block { $$=mknode("IF-ELSE", mknode("",$4,$6), mknode("",$9,NULL));}
-	 |  IF {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block  { $$=mknode("IF",$4,$6);}
+	 IF {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block  { $$=mknode("IF",$4,$6);}
+	|IF {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block ELSE {add('K');} code_block { $$=mknode("IF-ELSE", mknode("",$4,$6), mknode("",$9,NULL));}
+	   
 	;
 
 loops:
@@ -233,15 +237,15 @@ loops:
 assignment_statement: lhs  ASSIGNMENT expressions SEMICOLON {$$=mknode("=",$1,$3); };
 
 lhs:
-	   VARIABLE_ID {$$=mknode($1,NULL,NULL);}
-	 | VARIABLE_ID OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode($1,$3,NULL);}
+	   VARIABLE_ID  {check_declaration($1); $$=mknode($1,NULL,NULL);}
+	 | VARIABLE_ID {check_declaration($1);} OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode($1,$4,NULL);}
 	 ;
 
 init:  lhs ASSIGNMENT integer_literal {$$=mknode("=",$1,$3);};
 	
 update: lhs ASSIGNMENT exp {$$=mknode("=",$1,$3);};
 
-return: RETURN { add('K'); } exp SEMICOLON { $$=mknode("RET-VAL",$3,NULL);} ;
+return: RETURN  exp SEMICOLON { $$=mknode("RET-VAL",$2,NULL);} ;
 
  /* Expression */
 expressions: 
@@ -265,13 +269,13 @@ exp:
 	| exp AND exp {$$=mknode("&&",$1,$3);}												
 	| primitiveType {$$=mknode("",$1, NULL);} 			
 	| NOT exp {$$=mknode("!",$2,NULL);} 								
-	| VARIABLE_ID {$$=mknode($1,NULL,NULL);}											
+	| VARIABLE_ID {check_declaration($1); $$=mknode($1,NULL,NULL);}											
 	| function_call {$$=mknode("function_call",$1,NULL);}	  							
 	| LENGTH VARIABLE_ID LENGTH {$$=mknode($2,NULL,NULL);}	 									
 	| OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES {$$=mknode("exp",$2,NULL);}																
-	| ADDRESS VARIABLE_ID {$$=mknode("ADDRESS-OF",mknode($2,NULL,NULL),NULL);}	  											
-	| ADDRESS VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES {$$=mknode("ADDRESS-OF",mknode($2,$4,NULL),NULL);}	
-	| MULTIPLY VARIABLE_ID {$$=mknode($2,NULL,NULL);}	 								
+	| ADDRESS VARIABLE_ID {check_declaration($2); $$=mknode("ADDRESS-OF",mknode($2,NULL,NULL),NULL);}	  											
+	| ADDRESS VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES {check_declaration($2); $$=mknode("ADDRESS-OF",mknode($2,$4,NULL),NULL);}	
+	| MULTIPLY VARIABLE_ID {check_declaration($2); $$=mknode($2,NULL,NULL);}	 								
 	;
 
 string_exp:
@@ -414,8 +418,31 @@ int search(char *type) {
 	return 0;
 }
 
+int searchForDeclaration(char *type) {
+	int i,j;
+	int flag = 0;
+	for(j=count_scope_stack_elements-1; j>=0; j--) {
+		for(i = scopeStack[j].last_index-1; i>=0; i--) {
+			if(strcmp(scopeStack[j].symbol_table[i].type, "Function")==0 || strcmp(scopeStack[j].symbol_table[i].type, "Variable")==0){
+				if(strcmp(scopeStack[j].symbol_table[i].id_name, type)==0) {
+					flag = 1;
+					break;
+				}
+			}
+			
+		}
+
+		if(flag == 1){
+			break;
+		}
+	}
+
+	return flag;
+}
+
 void check_declaration(char *c) {
-    q = search(c);
+    q = searchForDeclaration(c);
+	printf("Search %d\n", q);
     if(!q) {
         sprintf(errors[sem_errors], "Line %d: Variable \"%s\" not declared before usage!\n", count_line+1, c);
 		sem_errors++;
@@ -478,6 +505,9 @@ void add(char c) {
     q=search(yytext);
 	if(!q) {
 		if(c == 'K') {
+
+			printf("%s\n", yytext);
+
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup("N/A");
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].line_no=count_line;
@@ -489,6 +519,8 @@ void add(char c) {
 		}
 		
 		else if(c == 'V') {
+
+			printf("%s\n", yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup(type);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].line_no=count_line;
@@ -509,7 +541,7 @@ void add(char c) {
 
 		else if(c == 'F') {
 
-			printf("%s", yytext);
+			printf("%s\n", yytext);
 
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup(type);
@@ -545,10 +577,10 @@ void set_current_scope(const char* scope) {
 
 
 void endScope() {
-	printf("%s %d", yytext,count_symbol_table_line);
+	printf("EndScope : %s %d\n", yytext,count_symbol_table_line);
 	current_scope_stack_top--;
 	count_symbol_table_line = scopeStack[current_scope_stack_top].last_index;
-	
+	printf("NewScope : %s %d", yytext,count_symbol_table_line);
 }
 
 void yyerror(const char* msg) {
