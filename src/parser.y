@@ -34,9 +34,9 @@
     int search(char *);
 	 void check_declaration(char *);
 	 int searchForDeclaration(char *type);
-	void check_return_type(char *);
+	void check_return_type(const char *);
 	int check_types(char *, char *);
-	char *get_type(char *);
+	char *get_type(const char *, int is_func);
 	void set_current_scope(const char *, int is_func);
 	void add_to_param_count();
 	void set_param_count(const char * name);
@@ -100,7 +100,7 @@
 // NODES FUNCTIONS 
 %type<node> program code function exp expressions parameter_list body_func body return  primitiveType argument nothing statment_func declaration
 %type<node> nested_declarations nested_statments nested_statments_func type code_block function_call assignment_statement conditions loops lhs statment
-%type<node> init update integer_literal variable_declaration variableL atributeList string_exp string_array temp function_call_params function_lhs
+%type<node> init update integer_literal variable_declaration variableL atributeList string_exp string_array temp function_call_params function_lhs ret_exp
 
 
 
@@ -143,8 +143,8 @@ parameter_list:
 argument: type atributeList {$$=mknode("ARGS-TYPE",$1,$2);};
 
 atributeList:
-	 VARIABLE_ID  COMMA atributeList {add_to_param_count(); $$=mknode($1,$3,NULL);}
-	|VARIABLE_ID {add_to_param_count(); $$=mknode($1,mknode(")",NULL,NULL),NULL);}
+	 VARIABLE_ID COMMA  atributeList {add_to_param_count(); $$=mknode($1,$3,NULL);}
+	|VARIABLE_ID  {add_to_param_count(); $$=mknode($1,mknode(")",NULL,NULL),NULL);}
 	;
 
 body: 
@@ -266,7 +266,12 @@ init:  lhs ASSIGNMENT integer_literal {$$=mknode("=",$1,$3);};
 	
 update: lhs ASSIGNMENT exp {$$=mknode("=",$1,$3);};
 
-return: RETURN  exp SEMICOLON { $$=mknode("RET-VAL",$2,NULL);} ;
+return: RETURN ret_exp SEMICOLON { $$=mknode("RET-VAL",$2,NULL);} ;
+
+ret_exp:
+	VARIABLE_ID {check_declaration($1); check_return_type($1);  $$=mknode($1,NULL,NULL);}
+
+	;
 
  /* Expression */
 expressions: 
@@ -397,14 +402,7 @@ int main() {
 			}
 		}
 	}
-		
-		printf("Scopes \n");
-	for(j = 0; j <= count_scope_stack_elements; j++){
-		printf("%s \n" , scopeStack[j].scope_name);
-	 }
-
-
-
+	
 
 	if(flag == 1) {
 		printf("\n\n");
@@ -475,15 +473,25 @@ void check_declaration(char *c) {
     }
 }
 
-void check_return_type(char *value) {
-	char *main_datatype = get_type("main");
-	char *return_datatype = get_type(value);
-	if((!strcmp(main_datatype, "int") && !strcmp(return_datatype, "CONST")) || !strcmp(main_datatype, return_datatype)){
-		return ;
-	}
-	else {
+void check_return_type(const char *value) {
+	char *func_datatype = get_type(scopeStack[current_scope_stack_top].scope_name, 1);
+	char *return_datatype = get_type(value, 0);
+	if(strcmp(func_datatype, return_datatype) != 0){
 		sprintf(errors[sem_errors], "Line %d: Return type mismatch\n", count_line+1);
 		sem_errors++;
+	}
+}
+
+
+char *get_type(const char *var, int is_func){
+	int temp = current_scope_stack_top;
+	if(is_func) {
+		temp = scopeStack[current_scope_stack_top].parent;
+	}
+	for(int i=0; i<count_symbol_table_line; i++) {
+		if(!strcmp(scopeStack[temp].symbol_table[i].id_name, var)) {
+			return scopeStack[temp].symbol_table[i].data_type;
+		}
 	}
 }
 
@@ -509,14 +517,6 @@ int check_types(char *type1, char *type2){
 		return 6;
 }
 
-char *get_type(char *var){
-	for(int i=0; i<count_symbol_table_line; i++) {
-		// Handle case of use before declaration
-		if(!strcmp(scopeStack[current_scope_stack_top].symbol_table[i].id_name, var)) {
-			return scopeStack[current_scope_stack_top].symbol_table[i].data_type;
-		}
-	}
-}
 
 void add(char c) {
 	if(c == 'V'){
@@ -531,9 +531,6 @@ void add(char c) {
     q=search(yytext);
 	if(!q) {
 		if(c == 'K') {
-
-			printf("%s\n", yytext);
-
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup("N/A");
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].line_no=count_line;
@@ -545,7 +542,6 @@ void add(char c) {
 		}
 		
 		else if(c == 'V') {
-
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup(type);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].line_no=count_line;
@@ -565,15 +561,11 @@ void add(char c) {
 		}
 
 		else if(c == 'F') {
-
-			printf("%s\n", yytext);
-
 			if(strcmp(yytext, "main") == 0 && mulltipleMain == 1){
 				sprintf(errors[sem_errors], "Line %d: mulltiple main declaration !\n", count_line+1);
 				sem_errors++;
 				return;
 			}
-				
 
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup(type);
@@ -598,13 +590,7 @@ void add(char c) {
 }
 
 void insert_type(const char* scope) {
-
 	strcpy(type, scope);
-
-	/* if(scopeStack[current_scope_stack_top].is_function == 1) {
-
-	} */
-
 }
 
 
@@ -615,21 +601,18 @@ void add_to_param_count() {
 		sem_errors++;
 	}else{
 		scopeStack[current_scope_stack_top].param_count ++;
-		printf("Count new func params %s %d\n", scopeStack[current_scope_stack_top].scope_name, scopeStack[current_scope_stack_top].param_count);
 	} 
-	
+
 }
 
 void set_param_count(const char * name) {
 	int i;
-	for( i = current_scope_stack_top; i >=0; i--) {
+	for( i = count_scope_stack_elements; i >=0; i--) {
 		if(strcmp(scopeStack[i].scope_name, name) == 0) {
 			param_count_current = scopeStack[i].param_count;
 		}
 	
 	}
-
-	printf("Paramer count %s %d\n", name ,param_count_current);
 }
 
 void check_param_list() {
@@ -655,12 +638,9 @@ void set_current_scope(const char* scope, int is_func) {
 	count_symbol_table_line = 0;
 }
 
-
 void endScope() {
-	printf("EndScope : %s %d\n" , scopeStack[current_scope_stack_top].scope_name, current_scope_stack_top);
 	current_scope_stack_top = scopeStack[current_scope_stack_top].parent;
 	count_symbol_table_line = scopeStack[current_scope_stack_top].last_index;
-	printf("NewScope : %s %d\n",  scopeStack[current_scope_stack_top].scope_name, current_scope_stack_top);
 }
 
 void yyerror(const char* msg) {

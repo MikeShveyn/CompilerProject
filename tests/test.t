@@ -1,14 +1,17 @@
-void check(int a,b) {
-    
-}
 
 
 void main()
-{   
+{       
+
+
     
-    var int x = 2;
-    var int a =1;
-    check(x,a);
+   void check(int a) {
+     
+     
+    }   
+
+    var int z = 1;
+    check(z);
 
 }
 
