@@ -17,8 +17,15 @@
 	
 	} node;
 
+	typedef struct node2
+	{	
+		node * node;
+		char * type;
+	} node2;
+
 	struct node *head;
 	node *mknode(char *token, node *left, node*right);
+	node2 *mknode2(char *token, node *left, node*right,char *);
 	void TreePrint(node *tree);
 	void CalcShift(int t); 
 	char *func_name=NULL;
@@ -43,6 +50,8 @@
 	void check_param_list();
 	void add_to_current_param_list();
 	void endScope();
+	char* check_alg_expr(char * type1, char * type2, char * op);
+	void check_declaration_type(char *type1, char *type2);
 	int sem_errors=0;
 	int param_count_current = 0;
 	int current_param_list = 0;
@@ -81,6 +90,7 @@
 %union
 {
 	struct node *node;
+	struct node2 *node2;
 	char *str; 
 }
 
@@ -98,10 +108,10 @@
 
 
 // NODES FUNCTIONS 
-%type<node> program code function exp expressions parameter_list body_func body return  primitiveType argument nothing statment_func declaration
-%type<node> nested_declarations nested_statments nested_statments_func type code_block function_call assignment_statement conditions loops lhs statment
-%type<node> init update integer_literal variable_declaration variableL atributeList string_exp string_array temp function_call_params function_lhs ret_exp
-
+%type<node> program code function  parameter_list body_func body return argument nothing statment_func declaration
+%type<node> nested_declarations nested_statments nested_statments_func type code_block function_call assignment_statement conditions loops  statment
+%type<node> init update integer_literal variable_declaration variableL atributeList string_exp string_array function_call_params function_lhs ret_exp 
+%type<node2> exp expressions  primitiveType args_cond temp lhs
 
 
 %left PLUS MINUS
@@ -188,7 +198,7 @@ function_call_params :
 
 function_lhs:
 	   VARIABLE_ID  {check_declaration($1); set_param_count($1); $$=mknode($1,NULL,NULL);}
-	 | VARIABLE_ID {check_declaration($1); set_param_count($1); }  OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode($1,$4,NULL);}
+	 | VARIABLE_ID {check_declaration($1); set_param_count($1); }  OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode($1,$4->node,NULL);}
 	 ;
 
 
@@ -206,24 +216,25 @@ declaration:
 	   
 variable_declaration:
 	  VAR  type  VARIABLE_ID {add('V');} temp 
-	  {
-		  $$ = mknode("VAR",$2, mknode($3, $5, NULL));
+	  {	
+		  check_declaration_type(type, $5->type);
+		  $$ = mknode("VAR",$2, mknode($3, $5->node, NULL));
 	  } 
 	  ;
 
 temp:
-	 SEMICOLON {$$=mknode("",NULL,NULL);}
+	 SEMICOLON {$$=mknode2("",NULL, NULL, "NONE");}
 	|ASSIGNMENT exp SEMICOLON 
 	{
-		$$=mknode("",$2,NULL); 
+		$$=mknode2("",$2->node,NULL, $2->type); 
 	}
 	;
 
 string_array: STRING VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES SEMICOLON {$$=mknode($2,$4,NULL);} ;	 
 
 variableL: 
-	     lhs COMMA variableL { $$ = mknode("",$1, $3); }
-	   | lhs ASSIGNMENT exp  COMMA variableL { $$ = mknode("=",$1, mknode("",$3, mknode("",$5,NULL))); }
+	     lhs COMMA variableL { $$ = mknode("",$1->node, $3); }
+	   | lhs ASSIGNMENT exp  COMMA variableL { $$ = mknode("=",$1->node, mknode("",$3->node, mknode("",$5,NULL))); }
 	   ; 
 
 /* Statments */
@@ -244,64 +255,105 @@ statment:
 code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES {endScope(); $$=mknode("CODE_BLOCK",$2,NULL);};
 
 conditions: 
-	 IF {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block  { $$=mknode("IF",$4,$6);}
-	|IF {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block ELSE {add('K');} code_block { $$=mknode("IF-ELSE", mknode("",$4,$6), mknode("",$9,NULL));}
+	 IF {add('K');} OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block  { $$=mknode("IF",$4->node,$6);}
+	|IF {add('K');} OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block ELSE {add('K');} code_block { $$=mknode("IF-ELSE", mknode("",$4->node,$6), mknode("",$9,NULL));}
 	   
 	;
 
 loops:
-	  WHILE {add('K');} OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES code_block {  $$=mknode("WHILE",$4,$6);}
-	| DO {add('K');} code_block WHILE  OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES SEMICOLON{  $$=mknode("DO-WHILE",$3,$6);}
-	| FOR {add('K');} OPEN_ANGLE_BRACES init SEMICOLON exp SEMICOLON update CLOSE_ANGLE_BRACES code_block { $$=mknode("FOR",mknode("INIT", $4, mknode("COND", $6, mknode("UPDATE",$8, NULL))),$10);}
+	  WHILE {add('K');} OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block {  $$=mknode("WHILE",$4->node,$6);}
+	| DO {add('K');} code_block WHILE  OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES SEMICOLON{  $$=mknode("DO-WHILE",$3,$6->node);}
+	| FOR {add('K');} OPEN_ANGLE_BRACES init SEMICOLON args_cond SEMICOLON update CLOSE_ANGLE_BRACES code_block { $$=mknode("FOR",mknode("INIT", $4, mknode("COND", $6->node, mknode("UPDATE",$8, NULL))),$10);}
 	;  
 
-assignment_statement: lhs  ASSIGNMENT expressions SEMICOLON {$$=mknode("=",$1,$3); };
+args_cond : 
+	 exp EQL exp {$$=mknode2("==",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log2"));}							
+	| exp NOT_EQL exp {$$=mknode2("!=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log2"));}							
+	| exp LESS exp {$$=mknode2("<",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3"));}									
+	| exp LESS_EQL exp {$$=mknode2("<=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3"));}								
+	| exp GREATER exp {$$=mknode2(">",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3"));}								
+	| exp GREATER_EQL exp {$$=mknode2(">=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3"));}
+    | exp OR exp {$$=mknode2("||",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log"));}
+	| exp AND exp {$$=mknode2("&&",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log"));}														
+	| NOT exp {$$=mknode2("!",$2->node,NULL, $2->type);} 
+
+assignment_statement: lhs  ASSIGNMENT expressions SEMICOLON {check_declaration_type($1->type, $3->type); $$=mknode("=",$1->node,$3->node); };
 
 lhs:
-	   VARIABLE_ID  {check_declaration($1); $$=mknode($1,NULL,NULL);}
-	 | VARIABLE_ID {check_declaration($1);} OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode($1,$4,NULL);}
+	   VARIABLE_ID  {check_declaration($1);   $$=mknode2($1,NULL,NULL, get_type($1, 0));}
+	 | VARIABLE_ID {check_declaration($1);} OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode2($1,$4->node,NULL, get_type($1, 0));}
 	 ;
 
-init:  lhs ASSIGNMENT integer_literal {$$=mknode("=",$1,$3);};
+init:  lhs ASSIGNMENT integer_literal {$$=mknode("=",$1->node,$3);};
 	
-update: lhs ASSIGNMENT exp {$$=mknode("=",$1,$3);};
+update: lhs ASSIGNMENT exp {$$=mknode("=",$1->node,$3->node);};
 
 return: RETURN ret_exp SEMICOLON { $$=mknode("RET-VAL",$2,NULL);} ;
 
 ret_exp:
 	VARIABLE_ID {check_declaration($1); check_return_type($1);  $$=mknode($1,NULL,NULL);}
+	 |BOOL_TRUE 
+	 {
+		 $$=mknode("True",NULL,NULL);
+		 add('C');
 
+	  } 
+	 |BOOL_FALSE 
+	  {
+		 $$=mknode("False",NULL,NULL); 
+		 add('C');
+	  } 
+	 | CHAR_LITERAL 
+	 {
+		 $$=mknode($1,NULL,NULL);
+		 add('C');
+	 } 
+	 | DECIMAL_LITERAL  
+	 {
+		$$=mknode($1,NULL,NULL); 
+	    add('C');
+	 } 
+	 | HEX_LITERAL 
+	 {
+		 $$=mknode($1,NULL,NULL);
+	     add('C');
+	 } 
+	 | REAL_LITERAL  
+	 {
+		 $$=mknode($1,NULL,NULL);
+		 add('C');
+	 } 
 	;
 
  /* Expression */
 expressions: 
-   exp COMMA expressions {$$=mknode("",$1,$3);}
- | exp {$$=mknode("",$1,NULL); }
- | nothing {$$=mknode("",$1,NULL);}
+   exp COMMA expressions {$$=mknode2("",$1->node,$3->node, "exp");}
+ | exp {$$=mknode2("",$1->node,NULL, $1->type); }
+ | nothing {$$=mknode2("",$1,NULL, "NONE");}
  ;
 
 exp: 
-	  exp PLUS exp {$$=mknode("+",$1,$3);}         			
-	| exp MINUS exp {$$=mknode("-",$1,$3);}              				
-	| exp MULTIPLY exp {$$=mknode("*",$1,$3);}								
-	| exp DIVISION exp {$$=mknode("/",$1,$3);}															
-	| exp EQL exp {$$=mknode("==",$1,$3);}							
-	| exp NOT_EQL exp {$$=mknode("!=",$1,$3);}							
-	| exp LESS exp {$$=mknode("<",$1,$3);}									
-	| exp LESS_EQL exp {$$=mknode("<=",$1,$3);}								
-	| exp GREATER exp {$$=mknode(">",$1,$3);}								
-	| exp GREATER_EQL exp {$$=mknode(">=",$1,$3);}
-    | exp OR exp {$$=mknode("||",$1,$3);}
-	| exp AND exp {$$=mknode("&&",$1,$3);}												
-	| primitiveType {$$=mknode("",$1, NULL);} 			
-	| NOT exp {$$=mknode("!",$2,NULL);} 								
-	| VARIABLE_ID {check_declaration($1);  $$=mknode($1,NULL,NULL);}											
-	| function_call {$$=mknode("function_call",$1,NULL);}	  							
-	| LENGTH VARIABLE_ID LENGTH {$$=mknode($2,NULL,NULL);}	 									
-	| OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES {$$=mknode("exp",$2,NULL);}																
-	| ADDRESS VARIABLE_ID {check_declaration($2); $$=mknode("ADDRESS-OF",mknode($2,NULL,NULL),NULL);}	  											
-	| ADDRESS VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES {check_declaration($2); $$=mknode("ADDRESS-OF",mknode($2,$4,NULL),NULL);}	
-	| MULTIPLY VARIABLE_ID {check_declaration($2); $$=mknode($2,NULL,NULL);}	 								
+	  exp PLUS exp {$$=mknode2("+",$1->node,$3->node, check_alg_expr($1->type, $3->type, "alg"));}         			
+	| exp MINUS exp {$$=mknode2("-",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "alg"));}              				
+	| exp MULTIPLY exp {$$=mknode2("*",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "alg"));}								
+	| exp DIVISION exp {$$=mknode2("/",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "alg"));}															
+	| exp EQL exp {$$=mknode2("==",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log2"));}							
+	| exp NOT_EQL exp {$$=mknode2("!=",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log2"));}							
+	| exp LESS exp {$$=mknode2("<",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log3"));}									
+	| exp LESS_EQL exp {$$=mknode2("<=",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log3"));}								
+	| exp GREATER exp {$$=mknode2(">",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log3"));}								
+	| exp GREATER_EQL exp {$$=mknode2(">=",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log3"));}
+    | exp OR exp {$$=mknode2("||",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log"));}
+	| exp AND exp {$$=mknode2("&&",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log"));}												
+	| primitiveType {$$=mknode2("",$1->node, NULL, $1->type);} 			
+	| NOT exp {$$=mknode2("!",$2->node,NULL, check_alg_expr("NONE", $2->type, "not"));} 								
+	| VARIABLE_ID {check_declaration($1);  $$=mknode2($1,NULL,NULL, get_type($1, 0));}											
+	| function_call {$$=mknode2("function_call",$1,NULL, "func");}	  							
+	| LENGTH VARIABLE_ID LENGTH {$$=mknode2($2,NULL,NULL, get_type($2, 0));}	 									
+	| OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES {$$=mknode2("exp",$2->node,NULL, $2->type);}																
+	| ADDRESS VARIABLE_ID {check_declaration($2); $$=mknode2("ADDRESS-OF",mknode($2,NULL,NULL),NULL, get_type($2, 0));}	  											
+	| ADDRESS VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES {check_declaration($2); $$=mknode2("ADDRESS-OF",mknode($2,$4,NULL),NULL, get_type($2, 0));}	
+	| MULTIPLY VARIABLE_ID {check_declaration($2); $$=mknode2($2,NULL,NULL, get_type($2, 0));}	 								
 	;
 
 string_exp:
@@ -327,42 +379,42 @@ type:
 primitiveType: 
 	 NONE 
 	 {
-		 $$=mknode("None",NULL,NULL);
+		 $$=mknode2("None",NULL,NULL, "None");
 		  add('C');
 	 } 
 	 |BOOL_TRUE 
 	 {
-		 $$=mknode("True",NULL,NULL);
-		 add('K');
+		 $$=mknode2("True",NULL,NULL, "BOOL");
+		 add('C');
 	  } 
 	 |BOOL_FALSE 
 	  {
-		 $$=mknode("False",NULL,NULL); 
-		 add('K'); 
+		 $$=mknode2("False",NULL,NULL, "BOOL"); 
+		 add('C'); 
 	  } 
 	 | CHAR_LITERAL 
 	 {
-		 $$=mknode($1,NULL,NULL);
+		 $$=mknode2($1,NULL,NULL, "CHAR");
 		  add('C');
 	 } 
 	 | DECIMAL_LITERAL  
 	 {
-		$$=mknode($1,NULL,NULL); 
+		$$=mknode2($1,NULL,NULL, "INT"); 
 		add('C');
 	 } 
 	 | HEX_LITERAL 
 	 {
-		 $$=mknode($1,NULL,NULL);
+		 $$=mknode2($1,NULL,NULL, "REAL");
 		  add('C');
 	 } 
 	 | REAL_LITERAL  
 	 {
-		 $$=mknode($1,NULL,NULL);
+		 $$=mknode2($1,NULL,NULL, "REAL");
 		  add('C');
 	 } 
 	 | STRING_LITERAL 
 	 {
-		 $$=mknode($1,NULL,NULL);
+		 $$=mknode2($1,NULL,NULL, "STR");
 		  add('C');
 	 } 
 	 ;
@@ -373,8 +425,6 @@ integer_literal:
 	 ;
 
 nothing:  {$$=NULL;}; 
-
-
 
 %%
 
@@ -496,25 +546,70 @@ char *get_type(const char *var, int is_func){
 }
 
 int check_types(char *type1, char *type2){
-	// declaration with no init
-	if(!strcmp(type2, "NONE"))
+	if(strcmp(type2, "NONE")==0 )
 		return -1;
-	// both datatypes are same
-	if(!strcmp(type1, type2))
-		return 0;
-	// both datatypes are different
-	if(!strcmp(type1, "INT") && !strcmp(type2, "REAL"))
+	if(strcmp(type1, "INT")==0  && strcmp(type2, "REAL")==0 )
 		return 1;
-	if(!strcmp(type1, "REAL") && !strcmp(type2, "INT"))
+	if(strcmp(type1, "REAL")==0  && strcmp(type2, "INT")==0 )
 		return 2;
-	if(!strcmp(type1, "INT") && !strcmp(type2, "CHAR"))
+	if(strcmp(type1, "INT")==0  && strcmp(type2, "CHAR")==0 )
 		return 3;
-	if(!strcmp(type1, "CHAR") && !strcmp(type2, "INT"))
+	if(strcmp(type1, "CHAR")==0  && strcmp(type2, "INT")==0 )
 		return 4;
-	if(!strcmp(type1, "REAL") && !strcmp(type2, "CHAR"))
+	if(strcmp(type1, "REAL")==0  && strcmp(type2, "CHAR")==0 )
 		return 5;
-	if(!strcmp(type1, "CHAR") && !strcmp(type2, "REAL"))
+	if(strcmp(type1, "CHAR")==0  && strcmp(type2, "REAL")==0 )
 		return 6;
+	if(strcmp(type1, "INT")==0 && strcmp(type2, "INT")==0)
+		return 7;
+	if(strcmp(type1, "REAL")==0  && strcmp(type2, "REAL")==0 )
+		return 8;
+	if(strcmp(type1, "BOOL")==0  && strcmp(type2, "BOOL")==0 )
+		return 9;
+
+	return 10;
+}
+
+char* check_alg_expr(char * type1, char * type2, char * op) {
+	printf("Check Alg exp %s %s %s\n", type1, type2, op);
+	int temp = check_types(type1, type2);
+	printf("%d\n", temp);
+	if(strcmp(op, "alg") == 0){
+		if( temp == 7)
+			return "INT";
+		else if(temp == 1 || temp == 2 || temp == 8)
+			return "REAL";
+	}else if(strcmp(op, "log")== 0){
+		if(temp == 9)
+			return "BOOL";	
+	}else if(strcmp(op, "log3")== 0){
+		if(temp == 1 || temp == 2 || temp==7 || temp == 8)
+			return "BOOL";	
+	}else if(strcmp(op, "log2")== 0){
+		if(strcmp(type1, type2)==0)
+			return "BOOL";	
+	}else if(strcmp(op, "not")== 0){
+		if(strcmp(type2,"BOOL")==0)
+			return "BOOL";
+	}else{
+		
+	}
+
+	sprintf(errors[sem_errors], "Line %d: TYPE CASTING ERROR \n", count_line+1);
+	sem_errors++;
+	return "EROR";
+}
+
+
+void check_declaration_type(char *type1, char *type2) {
+	printf("Check declaration type %s %s\n", type1, type2);
+	int temp = check_types(type1, type2);
+	printf(" Temp %d\n", temp);
+	
+	if(strcmp(type1, type2) !=0  && temp != -1 ){
+		sprintf(errors[sem_errors], "Line %d: TYPE CASTING ERROR \n", count_line+1);
+		sem_errors++;
+	}
 }
 
 
@@ -643,9 +738,10 @@ void endScope() {
 	count_symbol_table_line = scopeStack[current_scope_stack_top].last_index;
 }
 
+
+
 void yyerror(const char* msg) {
     fprintf(stderr, "%s\n", msg);
-
 }
 
 void freeStack() {
@@ -794,6 +890,17 @@ node *mknode(char *token,node *left,node *right)
 	newnode->left = left;
 	newnode->right = right;
 	newnode->token = newstr;
+	return newnode;
+}
+
+node2 *mknode2(char *token, node *left, node*right, char * type) {
+	node2 *newnode = (node2*)malloc(sizeof(node2));
+	char *newstr2 = (char*)malloc(sizeof(type) + 1);
+	strcpy(newstr2,type);
+	char *newstr = (char*)malloc(sizeof(token) + 1);
+	strcpy(newstr,token);
+	newnode->node = mknode(newstr, left, right);
+	newnode->type= newstr2;
 	return newnode;
 }
 
