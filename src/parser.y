@@ -40,10 +40,12 @@
 	void set_current_scope(const char *, int is_func);
 	void add_to_param_count();
 	void set_param_count(const char * name);
-	void check_param_list(const char *);
+	void check_param_list();
+	void add_to_current_param_list();
 	void endScope();
 	int sem_errors=0;
 	int param_count_current = 0;
+	int current_param_list = 0;
 	int label=0;
 	char buff[100];
 	char errors[10][100];
@@ -62,10 +64,11 @@
 		char * param_types;
 		int param_count;
 		int is_function;
+		int parent;
 		struct dataType symbol_table[40];
 	} scopeStack[40];
-
-	int count_scope_stack_elements = 0;
+	 
+	int count_scope_stack_elements = -1;
 	int current_scope_stack_top = -1;
     int count_symbol_table_line=0;
 	int count_code_lines = 0;
@@ -175,18 +178,19 @@ statment_func:
 	   | code_block {$$=mknode("",$1,NULL);}
 	   ;
 
+function_call: function_lhs OPEN_ANGLE_BRACES function_call_params  CLOSE_ANGLE_BRACES SEMICOLON {check_param_list(); $$=mknode("FUNCTION_CALL",$1,$3);};
 
-function_call: function_lhs OPEN_ANGLE_BRACES function_call_params  CLOSE_ANGLE_BRACES SEMICOLON { $$=mknode("FUNCTION_CALL",$1,$3);};
 
 function_call_params :
-		  VARIABLE_ID {check_declaration($1); check_param_list($1);} function_call_params  { $$=mknode("$1",$3, NULL);}
-		| VARIABLE_ID {check_declaration($1); check_param_list($1); $$=mknode("$1",NULL, NULL);}
+		  VARIABLE_ID {check_declaration($1); add_to_current_param_list();} COMMA function_call_params  { $$=mknode($1,$4, NULL);}
+		| VARIABLE_ID {check_declaration($1); add_to_current_param_list(); $$=mknode($1,NULL, NULL);}
 		;
 
 function_lhs:
 	   VARIABLE_ID  {check_declaration($1); set_param_count($1); $$=mknode($1,NULL,NULL);}
 	 | VARIABLE_ID {check_declaration($1); set_param_count($1); }  OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode($1,$4,NULL);}
 	 ;
+
 
  /* Declarations  */
 nested_declarations:
@@ -378,7 +382,7 @@ int main() {
 	printf("_______________________________________\n\n");
 	int i,j=0;
 	int flag = 0;
-	for(j = 0; j < count_scope_stack_elements; j++){
+	for(j = 0; j <= count_scope_stack_elements; j++){
 		int temp = scopeStack[j].last_index;
 		for(i=0; i < temp; i++) {
 			printf("%s\t%s\t%s\t%d\t%s\t\n",
@@ -393,6 +397,12 @@ int main() {
 			}
 		}
 	}
+		
+		printf("Scopes \n");
+	for(j = 0; j <= count_scope_stack_elements; j++){
+		printf("%s \n" , scopeStack[j].scope_name);
+	 }
+
 
 
 
@@ -438,7 +448,7 @@ int search(char *type) {
 int searchForDeclaration(char *type) {
 	int i,j;
 	int flag = 0;
-	for(j=count_scope_stack_elements-1; j>=0; j--) {
+	for(j=count_scope_stack_elements; j >= 0; j--) {
 		for(i = scopeStack[j].last_index-1; i>=0; i--) {
 			if(strcmp(scopeStack[j].symbol_table[i].type, "Function")==0 || strcmp(scopeStack[j].symbol_table[i].type, "Variable")==0){
 				if(strcmp(scopeStack[j].symbol_table[i].id_name, type)==0) {
@@ -459,7 +469,6 @@ int searchForDeclaration(char *type) {
 
 void check_declaration(char *c) {
     q = searchForDeclaration(c);
-	printf("Search %d\n", q);
     if(!q) {
         sprintf(errors[sem_errors], "Line %d: Variable \"%s\" not declared before usage!\n", count_line+1, c);
 		sem_errors++;
@@ -537,7 +546,6 @@ void add(char c) {
 		
 		else if(c == 'V') {
 
-			printf("%s\n", yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].data_type=strdup(type);
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].line_no=count_line;
@@ -559,6 +567,7 @@ void add(char c) {
 		else if(c == 'F') {
 
 			printf("%s\n", yytext);
+
 			if(strcmp(yytext, "main") == 0 && mulltipleMain == 1){
 				sprintf(errors[sem_errors], "Line %d: mulltiple main declaration !\n", count_line+1);
 				sem_errors++;
@@ -600,45 +609,58 @@ void insert_type(const char* scope) {
 
 
 void add_to_param_count() {
-	scopeStack[current_scope_stack_top].param_count ++;
 
+	if(strcmp(scopeStack[current_scope_stack_top].scope_name, "main")== 0) {
+		sprintf(errors[sem_errors], "Line %d: Main can't accept arguments \n", count_line+1);
+		sem_errors++;
+	}else{
+		scopeStack[current_scope_stack_top].param_count ++;
+		printf("Count new func params %s %d\n", scopeStack[current_scope_stack_top].scope_name, scopeStack[current_scope_stack_top].param_count);
+	} 
+	
 }
 
 void set_param_count(const char * name) {
 	int i;
-	for( i = current_scope_stack_top - 1; i >=0; i--) {
+	for( i = current_scope_stack_top; i >=0; i--) {
 		if(strcmp(scopeStack[i].scope_name, name) == 0) {
 			param_count_current = scopeStack[i].param_count;
 		}
 	
 	}
+
+	printf("Paramer count %s %d\n", name ,param_count_current);
 }
 
-void check_param_list(const char * var_name) {
-	if(param_count_current > 0) {
-		 param_count_current--;
-	}else {
-		 sprintf(errors[sem_errors], "Line %d: Function attribute list not matched \n", count_line+1);
-		 sem_errors++;
+void check_param_list() {
+	if(param_count_current - current_param_list != 0) {
+		sprintf(errors[sem_errors], "Line %d: Function attribute list not matched \n", count_line+1);
+		sem_errors++;
 	}
 }
 
+void add_to_current_param_list() {
+	current_param_list ++;
+}
+
 void set_current_scope(const char* scope, int is_func) {
-	current_scope_stack_top++;
+	int temp = current_scope_stack_top;
 	count_scope_stack_elements++;
-	scopeStack[current_scope_stack_top].scope_name = strdup(scope);
-	scopeStack[current_scope_stack_top].last_index = 0;
-	scopeStack[current_scope_stack_top].param_count = 0;
-	scopeStack[current_scope_stack_top].is_function = is_func;
+	current_scope_stack_top = count_scope_stack_elements;
+	scopeStack[count_scope_stack_elements].scope_name = strdup(scope);
+	scopeStack[count_scope_stack_elements].last_index = 0;
+	scopeStack[count_scope_stack_elements].param_count = 0;
+	scopeStack[count_scope_stack_elements].is_function = is_func;
+	scopeStack[count_scope_stack_elements].parent = temp;
 	count_symbol_table_line = 0;
 }
 
 
 void endScope() {
-	printf("EndScope : %s %d\n", yytext,count_symbol_table_line);
-	current_scope_stack_top--;
+	printf("EndScope : %s %d\n" , scopeStack[current_scope_stack_top].scope_name, current_scope_stack_top);
+	current_scope_stack_top = scopeStack[current_scope_stack_top].parent;
 	count_symbol_table_line = scopeStack[current_scope_stack_top].last_index;
-	printf("NewScope : %s %d", yytext,count_symbol_table_line);
+	printf("NewScope : %s %d\n",  scopeStack[current_scope_stack_top].scope_name, current_scope_stack_top);
 }
 
 void yyerror(const char* msg) {

@@ -1,4 +1,4 @@
-void check(int a) {
+void check(int a,b) {
     
 }
 
@@ -7,8 +7,8 @@ void main()
 {   
     
     var int x = 2;
-
-    check(x);
+    var int a =1;
+    check(x,a);
 
 }
 
