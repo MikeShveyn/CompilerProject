@@ -1,0 +1,4954 @@
+Nonterminals useless in grammar
+
+    variableL
+
+
+Terminals unused in grammar
+
+    COLON
+
+
+Rules useless in grammar
+
+  154 variableL: lhs COMMA variableL
+  155          | lhs ASSIGNMENT exp COMMA variableL
+
+
+Rules useless in parser due to conflicts
+
+   78 $@13: %empty
+
+
+State 38 conflicts: 1 shift/reduce
+State 39 conflicts: 1 reduce/reduce
+State 45 conflicts: 17 shift/reduce, 25 reduce/reduce
+State 46 conflicts: 1 reduce/reduce
+State 49 conflicts: 2 reduce/reduce
+State 50 conflicts: 7 shift/reduce, 1 reduce/reduce
+State 54 conflicts: 2 reduce/reduce
+State 55 conflicts: 11 shift/reduce
+State 74 conflicts: 17 shift/reduce, 5 reduce/reduce
+State 75 conflicts: 17 shift/reduce, 5 reduce/reduce
+State 80 conflicts: 7 shift/reduce, 1 reduce/reduce
+State 87 conflicts: 11 shift/reduce
+State 103 conflicts: 18 shift/reduce, 23 reduce/reduce
+State 106 conflicts: 1 reduce/reduce
+State 107 conflicts: 1 reduce/reduce
+State 108 conflicts: 8 shift/reduce, 1 reduce/reduce
+State 128 conflicts: 1 shift/reduce
+State 159 conflicts: 18 shift/reduce, 3 reduce/reduce
+State 160 conflicts: 18 shift/reduce, 3 reduce/reduce
+State 165 conflicts: 8 shift/reduce, 1 reduce/reduce
+State 236 conflicts: 1 reduce/reduce
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: code
+
+    2 code: function code
+    3     | COMMENT code
+    4     | function
+
+    5 $@1: %empty
+
+    6 $@2: %empty
+
+    7 function: type VARIABLE_ID $@1 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES $@2
+
+    8 $@3: %empty
+
+    9 $@4: %empty
+
+   10 function: VOID VARIABLE_ID $@3 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES $@4
+
+   11 parameter_list: argument SEMICOLON parameter_list
+   12               | argument
+   13               | nothing
+
+   14 argument: type atributeList
+
+   15 atributeList: VARIABLE_ID COMMA atributeList
+   16             | VARIABLE_ID
+
+   17 body: nested_declarations body
+   18     | nested_statments body
+   19     | nested_declarations
+   20     | nested_statments
+   21     | nothing
+   22     | COMMENT body
+   23     | COMMENT
+
+   24 body_func: nested_declarations body_func
+   25          | nested_statments_func body_func
+   26          | nested_declarations
+   27          | nested_statments_func
+   28          | nothing
+   29          | COMMENT body_func
+   30          | COMMENT
+
+   31 nested_statments_func: statment_func nested_statments_func
+   32                      | statment_func
+   33                      | COMMENT nested_statments_func
+   34                      | COMMENT
+
+   35 statment_func: function_call SEMICOLON
+   36              | assignment_statement
+   37              | conditions
+   38              | loops
+
+   39 $@5: %empty
+
+   40 statment_func: $@5 code_block
+
+   41 function_call: function_lhs OPEN_ANGLE_BRACES function_call_params CLOSE_ANGLE_BRACES
+
+   42 $@6: %empty
+
+   43 function_call_params: exp $@6 COMMA function_call_params
+   44                     | exp
+   45                     | nothing
+
+   46 function_lhs: VARIABLE_ID
+
+   47 $@7: %empty
+
+   48 function_lhs: VARIABLE_ID $@7 OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES
+
+   49 nested_declarations: declaration nested_declarations
+   50                    | declaration
+   51                    | COMMENT nested_declarations
+   52                    | COMMENT
+
+   53 declaration: function
+   54            | variable_declaration
+   55            | string_array
+
+   56 $@8: %empty
+
+   57 variable_declaration: VAR type VARIABLE_ID $@8 temp
+
+   58 $@9: %empty
+
+   59 temp: COMMA VARIABLE_ID $@9 temp
+   60     | SEMICOLON
+   61     | ASSIGNMENT exp SEMICOLON
+
+   62 $@10: %empty
+
+   63 string_array: STRING VARIABLE_ID $@10 OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES SEMICOLON
+
+   64 nested_statments: statment nested_statments
+   65                 | statment
+   66                 | COMMENT nested_statments
+   67                 | COMMENT
+
+   68 statment: function_call SEMICOLON
+   69         | assignment_statement
+   70         | return
+   71         | conditions
+   72         | loops
+
+   73 $@11: %empty
+
+   74 statment: $@11 code_block
+
+   75 code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES
+
+   76 $@12: %empty
+
+   77 conditions: IF $@12 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block
+
+   78 $@13: %empty
+
+   79 $@14: %empty
+
+   80 conditions: IF $@13 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block ELSE $@14 code_block
+
+   81 $@15: %empty
+
+   82 loops: WHILE $@15 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block
+
+   83 $@16: %empty
+
+   84 loops: DO $@16 code_block WHILE OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES SEMICOLON
+
+   85 $@17: %empty
+
+   86 loops: FOR $@17 OPEN_ANGLE_BRACES init SEMICOLON args_cond SEMICOLON update CLOSE_ANGLE_BRACES code_block
+
+   87 args_cond: exp EQL exp
+   88          | exp NOT_EQL exp
+   89          | exp LESS exp
+   90          | exp LESS_EQL exp
+   91          | exp GREATER exp
+   92          | exp GREATER_EQL exp
+   93          | exp OR exp
+   94          | exp AND exp
+   95          | NOT exp
+
+   96 assignment_statement: lhs ASSIGNMENT expressions SEMICOLON
+
+   97 lhs: VARIABLE_ID
+
+   98 $@18: %empty
+
+   99 lhs: VARIABLE_ID $@18 OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES
+  100    | MULTIPLY VARIABLE_ID
+
+  101 init: lhs ASSIGNMENT integer_literal
+
+  102 update: lhs ASSIGNMENT exp
+
+  103 return: RETURN exp SEMICOLON
+
+  104 expressions: exp COMMA expressions
+  105            | exp
+  106            | OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES
+  107            | nothing
+
+  108 exp: exp PLUS exp
+  109    | exp MINUS exp
+  110    | exp MULTIPLY exp
+  111    | exp DIVISION exp
+  112    | exp EQL exp
+  113    | exp NOT_EQL exp
+  114    | exp LESS exp
+  115    | exp LESS_EQL exp
+  116    | exp GREATER exp
+  117    | exp GREATER_EQL exp
+  118    | exp OR exp
+  119    | exp AND exp
+  120    | NOT exp
+  121    | VARIABLE_ID
+  122    | primitiveType
+  123    | function_call
+  124    | LENGTH VARIABLE_ID LENGTH
+  125    | OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES
+  126    | ADDRESS exp
+  127    | VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES
+  128    | MULTIPLY exp
+
+  129 string_exp: string_exp PLUS string_exp
+  130           | string_exp MINUS string_exp
+  131           | string_exp MULTIPLY string_exp
+  132           | string_exp DIVISION string_exp
+  133           | integer_literal
+  134           | VARIABLE_ID
+
+  135 type: BOOL
+  136     | CHAR
+  137     | CHAR_P
+  138     | INT
+  139     | INT_P
+  140     | REAL
+  141     | REAL_P
+  142     | STRING
+
+  143 primitiveType: NONE
+  144              | BOOL_TRUE
+  145              | BOOL_FALSE
+  146              | CHAR_LITERAL
+  147              | DECIMAL_LITERAL
+  148              | HEX_LITERAL
+  149              | REAL_LITERAL
+  150              | STRING_LITERAL
+
+  151 integer_literal: DECIMAL_LITERAL
+  152                | HEX_LITERAL
+
+  153 nothing: %empty
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    BOOL <str> (258) 135
+    CHAR <str> (259) 136
+    CHAR_P <str> (260) 137
+    INT <str> (261) 138
+    INT_P <str> (262) 139
+    REAL <str> (263) 140
+    REAL_P <str> (264) 141
+    STRING <str> (265) 63 142
+    VOID <str> (266) 10
+    IF <str> (267) 77 80
+    ELSE <str> (268) 80
+    DO <str> (269) 84
+    WHILE <str> (270) 82 84
+    FOR <str> (271) 86
+    VAR <str> (272) 57
+    RETURN <str> (273) 103
+    AND <str> (274) 94 119
+    DIVISION <str> (275) 111 132
+    ASSIGNMENT <str> (276) 61 96 101 102
+    EQL <str> (277) 87 112
+    GREATER <str> (278) 91 116
+    GREATER_EQL <str> (279) 92 117
+    LESS <str> (280) 89 114
+    LESS_EQL <str> (281) 90 115
+    MINUS <str> (282) 109 130
+    NOT <str> (283) 95 120
+    NOT_EQL <str> (284) 88 113
+    OR <str> (285) 93 118
+    PLUS <str> (286) 108 129
+    MULTIPLY <str> (287) 100 110 128 131
+    ADDRESS <str> (288) 126
+    LENGTH <str> (289) 124
+    SEMICOLON <str> (290) 11 35 60 61 63 68 84 86 96 103
+    COLON <str> (291)
+    COMMA <str> (292) 15 43 59 104
+    OPEN_CURLY_BRACES <str> (293) 7 10 75
+    CLOSE_CURLY_BRACES <str> (294) 7 10 75
+    OPEN_ANGLE_BRACES <str> (295) 7 10 41 77 80 82 84 86 106 125
+    CLOSE_ANGLE_BRACES <str> (296) 7 10 41 77 80 82 84 86 106 125
+    OPEN_SQUARE_BRACES <str> (297) 48 63 99 127
+    CLOSE_SQUARE_BRACES <str> (298) 48 63 99 127
+    COMMENT <str> (299) 3 22 23 29 30 33 34 51 52 66 67
+    NONE <str> (300) 143
+    BOOL_TRUE <str> (301) 144
+    BOOL_FALSE <str> (302) 145
+    CHAR_LITERAL <str> (303) 146
+    STRING_LITERAL <str> (304) 150
+    DECIMAL_LITERAL <str> (305) 147 151
+    HEX_LITERAL <str> (306) 148 152
+    REAL_LITERAL <str> (307) 149
+    VARIABLE_ID <str> (308) 7 10 15 16 46 48 57 59 63 97 99 100 121 124 127 134
+
+
+Nonterminals, with rules where they appear
+
+    $accept (54)
+        on left: 0
+    program <node> (55)
+        on left: 1
+        on right: 0
+    code <node> (56)
+        on left: 2 3 4
+        on right: 1 2 3
+    function <node> (57)
+        on left: 7 10
+        on right: 2 4 53
+    $@1 (58)
+        on left: 5
+        on right: 7
+    $@2 (59)
+        on left: 6
+        on right: 7
+    $@3 (60)
+        on left: 8
+        on right: 10
+    $@4 (61)
+        on left: 9
+        on right: 10
+    parameter_list <node> (62)
+        on left: 11 12 13
+        on right: 7 10 11
+    argument <node> (63)
+        on left: 14
+        on right: 11 12
+    atributeList <node> (64)
+        on left: 15 16
+        on right: 14 15
+    body <node> (65)
+        on left: 17 18 19 20 21 22 23
+        on right: 17 18 22 75
+    body_func <node> (66)
+        on left: 24 25 26 27 28 29 30
+        on right: 7 10 24 25 29
+    nested_statments_func <node> (67)
+        on left: 31 32 33 34
+        on right: 25 27 31 33
+    statment_func <node> (68)
+        on left: 35 36 37 38 40
+        on right: 31 32
+    $@5 (69)
+        on left: 39
+        on right: 40
+    function_call <node2> (70)
+        on left: 41
+        on right: 35 68 123
+    function_call_params <node> (71)
+        on left: 43 44 45
+        on right: 41 43
+    $@6 (72)
+        on left: 42
+        on right: 43
+    function_lhs <node2> (73)
+        on left: 46 48
+        on right: 41
+    $@7 (74)
+        on left: 47
+        on right: 48
+    nested_declarations <node> (75)
+        on left: 49 50 51 52
+        on right: 17 19 24 26 49 51
+    declaration <node> (76)
+        on left: 53 54 55
+        on right: 49 50
+    variable_declaration <node> (77)
+        on left: 57
+        on right: 54
+    $@8 (78)
+        on left: 56
+        on right: 57
+    temp <node2> (79)
+        on left: 59 60 61
+        on right: 57 59
+    $@9 (80)
+        on left: 58
+        on right: 59
+    string_array <node> (81)
+        on left: 63
+        on right: 55
+    $@10 (82)
+        on left: 62
+        on right: 63
+    nested_statments <node> (83)
+        on left: 64 65 66 67
+        on right: 18 20 64 66
+    statment <node> (84)
+        on left: 68 69 70 71 72 74
+        on right: 64 65
+    $@11 (85)
+        on left: 73
+        on right: 74
+    code_block <node> (86)
+        on left: 75
+        on right: 40 74 77 80 82 84 86
+    conditions <node> (87)
+        on left: 77 80
+        on right: 37 71
+    $@12 (88)
+        on left: 76
+        on right: 77
+    $@13 (89)
+        on left: 78
+        on right: 80
+    $@14 (90)
+        on left: 79
+        on right: 80
+    loops <node> (91)
+        on left: 82 84 86
+        on right: 38 72
+    $@15 (92)
+        on left: 81
+        on right: 82
+    $@16 (93)
+        on left: 83
+        on right: 84
+    $@17 (94)
+        on left: 85
+        on right: 86
+    args_cond <node2> (95)
+        on left: 87 88 89 90 91 92 93 94 95
+        on right: 77 80 82 84 86
+    assignment_statement <node> (96)
+        on left: 96
+        on right: 36 69
+    lhs <node2> (97)
+        on left: 97 99 100
+        on right: 96 101 102
+    $@18 (98)
+        on left: 98
+        on right: 99
+    init <node> (99)
+        on left: 101
+        on right: 86
+    update <node> (100)
+        on left: 102
+        on right: 86
+    return <node> (101)
+        on left: 103
+        on right: 7 70
+    expressions <node2> (102)
+        on left: 104 105 106 107
+        on right: 96 104
+    exp <node2> (103)
+        on left: 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128
+        on right: 43 44 48 61 87 88 89 90 91 92 93 94 95 102 103 104 105 106 108 109 110 111 112 113 114 115 116 117 118 119 120 125 126 128
+    string_exp <node> (104)
+        on left: 129 130 131 132 133 134
+        on right: 63 99 127 129 130 131 132
+    type <node> (105)
+        on left: 135 136 137 138 139 140 141 142
+        on right: 7 14 57
+    primitiveType <node2> (106)
+        on left: 143 144 145 146 147 148 149 150
+        on right: 122
+    integer_literal <node> (107)
+        on left: 151 152
+        on right: 101 133
+    nothing <node> (108)
+        on left: 153
+        on right: 13 21 28 45 107
+
+
+State 0
+
+    0 $accept: . program $end
+
+    BOOL     shift, and go to state 1
+    CHAR     shift, and go to state 2
+    CHAR_P   shift, and go to state 3
+    INT      shift, and go to state 4
+    INT_P    shift, and go to state 5
+    REAL     shift, and go to state 6
+    REAL_P   shift, and go to state 7
+    STRING   shift, and go to state 8
+    VOID     shift, and go to state 9
+    COMMENT  shift, and go to state 10
+
+    program   go to state 11
+    code      go to state 12
+    function  go to state 13
+    type      go to state 14
+
+
+State 1
+
+  135 type: BOOL .
+
+    $default  reduce using rule 135 (type)
+
+
+State 2
+
+  136 type: CHAR .
+
+    $default  reduce using rule 136 (type)
+
+
+State 3
+
+  137 type: CHAR_P .
+
+    $default  reduce using rule 137 (type)
+
+
+State 4
+
+  138 type: INT .
+
+    $default  reduce using rule 138 (type)
+
+
+State 5
+
+  139 type: INT_P .
+
+    $default  reduce using rule 139 (type)
+
+
+State 6
+
+  140 type: REAL .
+
+    $default  reduce using rule 140 (type)
+
+
+State 7
+
+  141 type: REAL_P .
+
+    $default  reduce using rule 141 (type)
+
+
+State 8
+
+  142 type: STRING .
+
+    $default  reduce using rule 142 (type)
+
+
+State 9
+
+   10 function: VOID . VARIABLE_ID $@3 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES $@4
+
+    VARIABLE_ID  shift, and go to state 15
+
+
+State 10
+
+    3 code: COMMENT . code
+
+    BOOL     shift, and go to state 1
+    CHAR     shift, and go to state 2
+    CHAR_P   shift, and go to state 3
+    INT      shift, and go to state 4
+    INT_P    shift, and go to state 5
+    REAL     shift, and go to state 6
+    REAL_P   shift, and go to state 7
+    STRING   shift, and go to state 8
+    VOID     shift, and go to state 9
+    COMMENT  shift, and go to state 10
+
+    code      go to state 16
+    function  go to state 13
+    type      go to state 14
+
+
+State 11
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 17
+
+
+State 12
+
+    1 program: code .
+
+    $default  reduce using rule 1 (program)
+
+
+State 13
+
+    2 code: function . code
+    4     | function .
+
+    BOOL     shift, and go to state 1
+    CHAR     shift, and go to state 2
+    CHAR_P   shift, and go to state 3
+    INT      shift, and go to state 4
+    INT_P    shift, and go to state 5
+    REAL     shift, and go to state 6
+    REAL_P   shift, and go to state 7
+    STRING   shift, and go to state 8
+    VOID     shift, and go to state 9
+    COMMENT  shift, and go to state 10
+
+    $default  reduce using rule 4 (code)
+
+    code      go to state 18
+    function  go to state 13
+    type      go to state 14
+
+
+State 14
+
+    7 function: type . VARIABLE_ID $@1 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES $@2
+
+    VARIABLE_ID  shift, and go to state 19
+
+
+State 15
+
+   10 function: VOID VARIABLE_ID . $@3 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES $@4
+
+    $default  reduce using rule 8 ($@3)
+
+    $@3  go to state 20
+
+
+State 16
+
+    3 code: COMMENT code .
+
+    $default  reduce using rule 3 (code)
+
+
+State 17
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 18
+
+    2 code: function code .
+
+    $default  reduce using rule 2 (code)
+
+
+State 19
+
+    7 function: type VARIABLE_ID . $@1 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES $@2
+
+    $default  reduce using rule 5 ($@1)
+
+    $@1  go to state 21
+
+
+State 20
+
+   10 function: VOID VARIABLE_ID $@3 . OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES $@4
+
+    OPEN_ANGLE_BRACES  shift, and go to state 22
+
+
+State 21
+
+    7 function: type VARIABLE_ID $@1 . OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES $@2
+
+    OPEN_ANGLE_BRACES  shift, and go to state 23
+
+
+State 22
+
+   10 function: VOID VARIABLE_ID $@3 OPEN_ANGLE_BRACES . parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES $@4
+
+    BOOL    shift, and go to state 1
+    CHAR    shift, and go to state 2
+    CHAR_P  shift, and go to state 3
+    INT     shift, and go to state 4
+    INT_P   shift, and go to state 5
+    REAL    shift, and go to state 6
+    REAL_P  shift, and go to state 7
+    STRING  shift, and go to state 8
+
+    $default  reduce using rule 153 (nothing)
+
+    parameter_list  go to state 24
+    argument        go to state 25
+    type            go to state 26
+    nothing         go to state 27
+
+
+State 23
+
+    7 function: type VARIABLE_ID $@1 OPEN_ANGLE_BRACES . parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES $@2
+
+    BOOL    shift, and go to state 1
+    CHAR    shift, and go to state 2
+    CHAR_P  shift, and go to state 3
+    INT     shift, and go to state 4
+    INT_P   shift, and go to state 5
+    REAL    shift, and go to state 6
+    REAL_P  shift, and go to state 7
+    STRING  shift, and go to state 8
+
+    $default  reduce using rule 153 (nothing)
+
+    parameter_list  go to state 28
+    argument        go to state 25
+    type            go to state 26
+    nothing         go to state 27
+
+
+State 24
+
+   10 function: VOID VARIABLE_ID $@3 OPEN_ANGLE_BRACES parameter_list . CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES $@4
+
+    CLOSE_ANGLE_BRACES  shift, and go to state 29
+
+
+State 25
+
+   11 parameter_list: argument . SEMICOLON parameter_list
+   12               | argument .
+
+    SEMICOLON  shift, and go to state 30
+
+    $default  reduce using rule 12 (parameter_list)
+
+
+State 26
+
+   14 argument: type . atributeList
+
+    VARIABLE_ID  shift, and go to state 31
+
+    atributeList  go to state 32
+
+
+State 27
+
+   13 parameter_list: nothing .
+
+    $default  reduce using rule 13 (parameter_list)
+
+
+State 28
+
+    7 function: type VARIABLE_ID $@1 OPEN_ANGLE_BRACES parameter_list . CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES $@2
+
+    CLOSE_ANGLE_BRACES  shift, and go to state 33
+
+
+State 29
+
+   10 function: VOID VARIABLE_ID $@3 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES . OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES $@4
+
+    OPEN_CURLY_BRACES  shift, and go to state 34
+
+
+State 30
+
+   11 parameter_list: argument SEMICOLON . parameter_list
+
+    BOOL    shift, and go to state 1
+    CHAR    shift, and go to state 2
+    CHAR_P  shift, and go to state 3
+    INT     shift, and go to state 4
+    INT_P   shift, and go to state 5
+    REAL    shift, and go to state 6
+    REAL_P  shift, and go to state 7
+    STRING  shift, and go to state 8
+
+    $default  reduce using rule 153 (nothing)
+
+    parameter_list  go to state 35
+    argument        go to state 25
+    type            go to state 26
+    nothing         go to state 27
+
+
+State 31
+
+   15 atributeList: VARIABLE_ID . COMMA atributeList
+   16             | VARIABLE_ID .
+
+    COMMA  shift, and go to state 36
+
+    $default  reduce using rule 16 (atributeList)
+
+
+State 32
+
+   14 argument: type atributeList .
+
+    $default  reduce using rule 14 (argument)
+
+
+State 33
+
+    7 function: type VARIABLE_ID $@1 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES . OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES $@2
+
+    OPEN_CURLY_BRACES  shift, and go to state 37
+
+
+State 34
+
+   10 function: VOID VARIABLE_ID $@3 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES . body_func CLOSE_CURLY_BRACES $@4
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 45
+    VARIABLE_ID  shift, and go to state 46
+
+    CLOSE_CURLY_BRACES  reduce using rule 153 (nothing)
+    $default            reduce using rule 39 ($@5)
+
+    function               go to state 47
+    body_func              go to state 48
+    nested_statments_func  go to state 49
+    statment_func          go to state 50
+    $@5                    go to state 51
+    function_call          go to state 52
+    function_lhs           go to state 53
+    nested_declarations    go to state 54
+    declaration            go to state 55
+    variable_declaration   go to state 56
+    string_array           go to state 57
+    conditions             go to state 58
+    loops                  go to state 59
+    assignment_statement   go to state 60
+    lhs                    go to state 61
+    type                   go to state 14
+    nothing                go to state 62
+
+
+State 35
+
+   11 parameter_list: argument SEMICOLON parameter_list .
+
+    $default  reduce using rule 11 (parameter_list)
+
+
+State 36
+
+   15 atributeList: VARIABLE_ID COMMA . atributeList
+
+    VARIABLE_ID  shift, and go to state 31
+
+    atributeList  go to state 63
+
+
+State 37
+
+    7 function: type VARIABLE_ID $@1 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES . body_func return CLOSE_CURLY_BRACES $@2
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 45
+    VARIABLE_ID  shift, and go to state 46
+
+    RETURN    reduce using rule 153 (nothing)
+    $default  reduce using rule 39 ($@5)
+
+    function               go to state 47
+    body_func              go to state 64
+    nested_statments_func  go to state 49
+    statment_func          go to state 50
+    $@5                    go to state 51
+    function_call          go to state 52
+    function_lhs           go to state 53
+    nested_declarations    go to state 54
+    declaration            go to state 55
+    variable_declaration   go to state 56
+    string_array           go to state 57
+    conditions             go to state 58
+    loops                  go to state 59
+    assignment_statement   go to state 60
+    lhs                    go to state 61
+    type                   go to state 14
+    nothing                go to state 62
+
+
+State 38
+
+   63 string_array: STRING . VARIABLE_ID $@10 OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES SEMICOLON
+  142 type: STRING .
+
+    VARIABLE_ID  shift, and go to state 65
+
+    VARIABLE_ID  [reduce using rule 142 (type)]
+
+
+State 39
+
+   77 conditions: IF . $@12 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block
+   80           | IF . $@13 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block ELSE $@14 code_block
+
+    OPEN_ANGLE_BRACES  reduce using rule 76 ($@12)
+    OPEN_ANGLE_BRACES  [reduce using rule 78 ($@13)]
+    $default           reduce using rule 76 ($@12)
+
+    $@12  go to state 66
+    $@13  go to state 67
+
+
+State 40
+
+   84 loops: DO . $@16 code_block WHILE OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES SEMICOLON
+
+    $default  reduce using rule 83 ($@16)
+
+    $@16  go to state 68
+
+
+State 41
+
+   82 loops: WHILE . $@15 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block
+
+    $default  reduce using rule 81 ($@15)
+
+    $@15  go to state 69
+
+
+State 42
+
+   86 loops: FOR . $@17 OPEN_ANGLE_BRACES init SEMICOLON args_cond SEMICOLON update CLOSE_ANGLE_BRACES code_block
+
+    $default  reduce using rule 85 ($@17)
+
+    $@17  go to state 70
+
+
+State 43
+
+   57 variable_declaration: VAR . type VARIABLE_ID $@8 temp
+
+    BOOL    shift, and go to state 1
+    CHAR    shift, and go to state 2
+    CHAR_P  shift, and go to state 3
+    INT     shift, and go to state 4
+    INT_P   shift, and go to state 5
+    REAL    shift, and go to state 6
+    REAL_P  shift, and go to state 7
+    STRING  shift, and go to state 8
+
+    type  go to state 71
+
+
+State 44
+
+  100 lhs: MULTIPLY . VARIABLE_ID
+
+    VARIABLE_ID  shift, and go to state 72
+
+
+State 45
+
+   29 body_func: COMMENT . body_func
+   30          | COMMENT .
+   33 nested_statments_func: COMMENT . nested_statments_func
+   34                      | COMMENT .
+   51 nested_declarations: COMMENT . nested_declarations
+   52                    | COMMENT .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 45
+    VARIABLE_ID  shift, and go to state 46
+
+    BOOL                [reduce using rule 34 (nested_statments_func)]
+    BOOL                [reduce using rule 52 (nested_declarations)]
+    CHAR                [reduce using rule 34 (nested_statments_func)]
+    CHAR                [reduce using rule 52 (nested_declarations)]
+    CHAR_P              [reduce using rule 34 (nested_statments_func)]
+    CHAR_P              [reduce using rule 52 (nested_declarations)]
+    INT                 [reduce using rule 34 (nested_statments_func)]
+    INT                 [reduce using rule 52 (nested_declarations)]
+    INT_P               [reduce using rule 34 (nested_statments_func)]
+    INT_P               [reduce using rule 52 (nested_declarations)]
+    REAL                [reduce using rule 34 (nested_statments_func)]
+    REAL                [reduce using rule 52 (nested_declarations)]
+    REAL_P              [reduce using rule 34 (nested_statments_func)]
+    REAL_P              [reduce using rule 52 (nested_declarations)]
+    STRING              [reduce using rule 34 (nested_statments_func)]
+    STRING              [reduce using rule 52 (nested_declarations)]
+    VOID                [reduce using rule 34 (nested_statments_func)]
+    VOID                [reduce using rule 52 (nested_declarations)]
+    IF                  [reduce using rule 34 (nested_statments_func)]
+    IF                  [reduce using rule 52 (nested_declarations)]
+    DO                  [reduce using rule 34 (nested_statments_func)]
+    DO                  [reduce using rule 52 (nested_declarations)]
+    WHILE               [reduce using rule 34 (nested_statments_func)]
+    WHILE               [reduce using rule 52 (nested_declarations)]
+    FOR                 [reduce using rule 34 (nested_statments_func)]
+    FOR                 [reduce using rule 52 (nested_declarations)]
+    VAR                 [reduce using rule 34 (nested_statments_func)]
+    VAR                 [reduce using rule 52 (nested_declarations)]
+    RETURN              reduce using rule 30 (body_func)
+    RETURN              [reduce using rule 34 (nested_statments_func)]
+    RETURN              [reduce using rule 52 (nested_declarations)]
+    RETURN              [reduce using rule 153 (nothing)]
+    MULTIPLY            [reduce using rule 34 (nested_statments_func)]
+    MULTIPLY            [reduce using rule 52 (nested_declarations)]
+    OPEN_CURLY_BRACES   reduce using rule 34 (nested_statments_func)
+    OPEN_CURLY_BRACES   [reduce using rule 39 ($@5)]
+    OPEN_CURLY_BRACES   [reduce using rule 52 (nested_declarations)]
+    CLOSE_CURLY_BRACES  reduce using rule 30 (body_func)
+    CLOSE_CURLY_BRACES  [reduce using rule 34 (nested_statments_func)]
+    CLOSE_CURLY_BRACES  [reduce using rule 52 (nested_declarations)]
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    COMMENT             [reduce using rule 34 (nested_statments_func)]
+    COMMENT             [reduce using rule 52 (nested_declarations)]
+    VARIABLE_ID         [reduce using rule 34 (nested_statments_func)]
+    VARIABLE_ID         [reduce using rule 52 (nested_declarations)]
+    $default            reduce using rule 30 (body_func)
+
+    function               go to state 47
+    body_func              go to state 73
+    nested_statments_func  go to state 74
+    statment_func          go to state 50
+    $@5                    go to state 51
+    function_call          go to state 52
+    function_lhs           go to state 53
+    nested_declarations    go to state 75
+    declaration            go to state 55
+    variable_declaration   go to state 56
+    string_array           go to state 57
+    conditions             go to state 58
+    loops                  go to state 59
+    assignment_statement   go to state 60
+    lhs                    go to state 61
+    type                   go to state 14
+    nothing                go to state 62
+
+
+State 46
+
+   46 function_lhs: VARIABLE_ID .
+   48             | VARIABLE_ID . $@7 OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES
+   97 lhs: VARIABLE_ID .
+   99    | VARIABLE_ID . $@18 OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES
+
+    ASSIGNMENT          reduce using rule 97 (lhs)
+    OPEN_SQUARE_BRACES  reduce using rule 47 ($@7)
+    OPEN_SQUARE_BRACES  [reduce using rule 98 ($@18)]
+    $default            reduce using rule 46 (function_lhs)
+
+    $@7   go to state 76
+    $@18  go to state 77
+
+
+State 47
+
+   53 declaration: function .
+
+    $default  reduce using rule 53 (declaration)
+
+
+State 48
+
+   10 function: VOID VARIABLE_ID $@3 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func . CLOSE_CURLY_BRACES $@4
+
+    CLOSE_CURLY_BRACES  shift, and go to state 78
+
+
+State 49
+
+   25 body_func: nested_statments_func . body_func
+   27          | nested_statments_func .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 45
+    VARIABLE_ID  shift, and go to state 46
+
+    RETURN              reduce using rule 27 (body_func)
+    RETURN              [reduce using rule 153 (nothing)]
+    OPEN_CURLY_BRACES   reduce using rule 39 ($@5)
+    CLOSE_CURLY_BRACES  reduce using rule 27 (body_func)
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    $default            reduce using rule 27 (body_func)
+
+    function               go to state 47
+    body_func              go to state 79
+    nested_statments_func  go to state 49
+    statment_func          go to state 50
+    $@5                    go to state 51
+    function_call          go to state 52
+    function_lhs           go to state 53
+    nested_declarations    go to state 54
+    declaration            go to state 55
+    variable_declaration   go to state 56
+    string_array           go to state 57
+    conditions             go to state 58
+    loops                  go to state 59
+    assignment_statement   go to state 60
+    lhs                    go to state 61
+    type                   go to state 14
+    nothing                go to state 62
+
+
+State 50
+
+   31 nested_statments_func: statment_func . nested_statments_func
+   32                      | statment_func .
+
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 80
+    VARIABLE_ID  shift, and go to state 46
+
+    IF                 [reduce using rule 32 (nested_statments_func)]
+    DO                 [reduce using rule 32 (nested_statments_func)]
+    WHILE              [reduce using rule 32 (nested_statments_func)]
+    FOR                [reduce using rule 32 (nested_statments_func)]
+    MULTIPLY           [reduce using rule 32 (nested_statments_func)]
+    OPEN_CURLY_BRACES  reduce using rule 32 (nested_statments_func)
+    OPEN_CURLY_BRACES  [reduce using rule 39 ($@5)]
+    COMMENT            [reduce using rule 32 (nested_statments_func)]
+    VARIABLE_ID        [reduce using rule 32 (nested_statments_func)]
+    $default           reduce using rule 32 (nested_statments_func)
+
+    nested_statments_func  go to state 81
+    statment_func          go to state 50
+    $@5                    go to state 51
+    function_call          go to state 52
+    function_lhs           go to state 53
+    conditions             go to state 58
+    loops                  go to state 59
+    assignment_statement   go to state 60
+    lhs                    go to state 61
+
+
+State 51
+
+   40 statment_func: $@5 . code_block
+
+    OPEN_CURLY_BRACES  shift, and go to state 82
+
+    code_block  go to state 83
+
+
+State 52
+
+   35 statment_func: function_call . SEMICOLON
+
+    SEMICOLON  shift, and go to state 84
+
+
+State 53
+
+   41 function_call: function_lhs . OPEN_ANGLE_BRACES function_call_params CLOSE_ANGLE_BRACES
+
+    OPEN_ANGLE_BRACES  shift, and go to state 85
+
+
+State 54
+
+   24 body_func: nested_declarations . body_func
+   26          | nested_declarations .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 45
+    VARIABLE_ID  shift, and go to state 46
+
+    RETURN              reduce using rule 26 (body_func)
+    RETURN              [reduce using rule 153 (nothing)]
+    OPEN_CURLY_BRACES   reduce using rule 39 ($@5)
+    CLOSE_CURLY_BRACES  reduce using rule 26 (body_func)
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    $default            reduce using rule 26 (body_func)
+
+    function               go to state 47
+    body_func              go to state 86
+    nested_statments_func  go to state 49
+    statment_func          go to state 50
+    $@5                    go to state 51
+    function_call          go to state 52
+    function_lhs           go to state 53
+    nested_declarations    go to state 54
+    declaration            go to state 55
+    variable_declaration   go to state 56
+    string_array           go to state 57
+    conditions             go to state 58
+    loops                  go to state 59
+    assignment_statement   go to state 60
+    lhs                    go to state 61
+    type                   go to state 14
+    nothing                go to state 62
+
+
+State 55
+
+   49 nested_declarations: declaration . nested_declarations
+   50                    | declaration .
+
+    BOOL     shift, and go to state 1
+    CHAR     shift, and go to state 2
+    CHAR_P   shift, and go to state 3
+    INT      shift, and go to state 4
+    INT_P    shift, and go to state 5
+    REAL     shift, and go to state 6
+    REAL_P   shift, and go to state 7
+    STRING   shift, and go to state 38
+    VOID     shift, and go to state 9
+    VAR      shift, and go to state 43
+    COMMENT  shift, and go to state 87
+
+    BOOL      [reduce using rule 50 (nested_declarations)]
+    CHAR      [reduce using rule 50 (nested_declarations)]
+    CHAR_P    [reduce using rule 50 (nested_declarations)]
+    INT       [reduce using rule 50 (nested_declarations)]
+    INT_P     [reduce using rule 50 (nested_declarations)]
+    REAL      [reduce using rule 50 (nested_declarations)]
+    REAL_P    [reduce using rule 50 (nested_declarations)]
+    STRING    [reduce using rule 50 (nested_declarations)]
+    VOID      [reduce using rule 50 (nested_declarations)]
+    VAR       [reduce using rule 50 (nested_declarations)]
+    COMMENT   [reduce using rule 50 (nested_declarations)]
+    $default  reduce using rule 50 (nested_declarations)
+
+    function              go to state 47
+    nested_declarations   go to state 88
+    declaration           go to state 55
+    variable_declaration  go to state 56
+    string_array          go to state 57
+    type                  go to state 14
+
+
+State 56
+
+   54 declaration: variable_declaration .
+
+    $default  reduce using rule 54 (declaration)
+
+
+State 57
+
+   55 declaration: string_array .
+
+    $default  reduce using rule 55 (declaration)
+
+
+State 58
+
+   37 statment_func: conditions .
+
+    $default  reduce using rule 37 (statment_func)
+
+
+State 59
+
+   38 statment_func: loops .
+
+    $default  reduce using rule 38 (statment_func)
+
+
+State 60
+
+   36 statment_func: assignment_statement .
+
+    $default  reduce using rule 36 (statment_func)
+
+
+State 61
+
+   96 assignment_statement: lhs . ASSIGNMENT expressions SEMICOLON
+
+    ASSIGNMENT  shift, and go to state 89
+
+
+State 62
+
+   28 body_func: nothing .
+
+    $default  reduce using rule 28 (body_func)
+
+
+State 63
+
+   15 atributeList: VARIABLE_ID COMMA atributeList .
+
+    $default  reduce using rule 15 (atributeList)
+
+
+State 64
+
+    7 function: type VARIABLE_ID $@1 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func . return CLOSE_CURLY_BRACES $@2
+
+    RETURN  shift, and go to state 90
+
+    return  go to state 91
+
+
+State 65
+
+   63 string_array: STRING VARIABLE_ID . $@10 OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES SEMICOLON
+
+    $default  reduce using rule 62 ($@10)
+
+    $@10  go to state 92
+
+
+State 66
+
+   77 conditions: IF $@12 . OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block
+
+    OPEN_ANGLE_BRACES  shift, and go to state 93
+
+
+State 67
+
+   80 conditions: IF $@13 . OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block ELSE $@14 code_block
+
+    OPEN_ANGLE_BRACES  shift, and go to state 94
+
+
+State 68
+
+   84 loops: DO $@16 . code_block WHILE OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES SEMICOLON
+
+    OPEN_CURLY_BRACES  shift, and go to state 82
+
+    code_block  go to state 95
+
+
+State 69
+
+   82 loops: WHILE $@15 . OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block
+
+    OPEN_ANGLE_BRACES  shift, and go to state 96
+
+
+State 70
+
+   86 loops: FOR $@17 . OPEN_ANGLE_BRACES init SEMICOLON args_cond SEMICOLON update CLOSE_ANGLE_BRACES code_block
+
+    OPEN_ANGLE_BRACES  shift, and go to state 97
+
+
+State 71
+
+   57 variable_declaration: VAR type . VARIABLE_ID $@8 temp
+
+    VARIABLE_ID  shift, and go to state 98
+
+
+State 72
+
+  100 lhs: MULTIPLY VARIABLE_ID .
+
+    $default  reduce using rule 100 (lhs)
+
+
+State 73
+
+   29 body_func: COMMENT body_func .
+
+    $default  reduce using rule 29 (body_func)
+
+
+State 74
+
+   25 body_func: nested_statments_func . body_func
+   27          | nested_statments_func .
+   33 nested_statments_func: COMMENT nested_statments_func .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 45
+    VARIABLE_ID  shift, and go to state 46
+
+    BOOL                [reduce using rule 33 (nested_statments_func)]
+    CHAR                [reduce using rule 33 (nested_statments_func)]
+    CHAR_P              [reduce using rule 33 (nested_statments_func)]
+    INT                 [reduce using rule 33 (nested_statments_func)]
+    INT_P               [reduce using rule 33 (nested_statments_func)]
+    REAL                [reduce using rule 33 (nested_statments_func)]
+    REAL_P              [reduce using rule 33 (nested_statments_func)]
+    STRING              [reduce using rule 33 (nested_statments_func)]
+    VOID                [reduce using rule 33 (nested_statments_func)]
+    IF                  [reduce using rule 33 (nested_statments_func)]
+    DO                  [reduce using rule 33 (nested_statments_func)]
+    WHILE               [reduce using rule 33 (nested_statments_func)]
+    FOR                 [reduce using rule 33 (nested_statments_func)]
+    VAR                 [reduce using rule 33 (nested_statments_func)]
+    RETURN              reduce using rule 27 (body_func)
+    RETURN              [reduce using rule 33 (nested_statments_func)]
+    RETURN              [reduce using rule 153 (nothing)]
+    MULTIPLY            [reduce using rule 33 (nested_statments_func)]
+    OPEN_CURLY_BRACES   reduce using rule 33 (nested_statments_func)
+    OPEN_CURLY_BRACES   [reduce using rule 39 ($@5)]
+    CLOSE_CURLY_BRACES  reduce using rule 27 (body_func)
+    CLOSE_CURLY_BRACES  [reduce using rule 33 (nested_statments_func)]
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    COMMENT             [reduce using rule 33 (nested_statments_func)]
+    VARIABLE_ID         [reduce using rule 33 (nested_statments_func)]
+    $default            reduce using rule 27 (body_func)
+
+    function               go to state 47
+    body_func              go to state 79
+    nested_statments_func  go to state 49
+    statment_func          go to state 50
+    $@5                    go to state 51
+    function_call          go to state 52
+    function_lhs           go to state 53
+    nested_declarations    go to state 54
+    declaration            go to state 55
+    variable_declaration   go to state 56
+    string_array           go to state 57
+    conditions             go to state 58
+    loops                  go to state 59
+    assignment_statement   go to state 60
+    lhs                    go to state 61
+    type                   go to state 14
+    nothing                go to state 62
+
+
+State 75
+
+   24 body_func: nested_declarations . body_func
+   26          | nested_declarations .
+   51 nested_declarations: COMMENT nested_declarations .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 45
+    VARIABLE_ID  shift, and go to state 46
+
+    BOOL                [reduce using rule 51 (nested_declarations)]
+    CHAR                [reduce using rule 51 (nested_declarations)]
+    CHAR_P              [reduce using rule 51 (nested_declarations)]
+    INT                 [reduce using rule 51 (nested_declarations)]
+    INT_P               [reduce using rule 51 (nested_declarations)]
+    REAL                [reduce using rule 51 (nested_declarations)]
+    REAL_P              [reduce using rule 51 (nested_declarations)]
+    STRING              [reduce using rule 51 (nested_declarations)]
+    VOID                [reduce using rule 51 (nested_declarations)]
+    IF                  [reduce using rule 51 (nested_declarations)]
+    DO                  [reduce using rule 51 (nested_declarations)]
+    WHILE               [reduce using rule 51 (nested_declarations)]
+    FOR                 [reduce using rule 51 (nested_declarations)]
+    VAR                 [reduce using rule 51 (nested_declarations)]
+    RETURN              reduce using rule 26 (body_func)
+    RETURN              [reduce using rule 51 (nested_declarations)]
+    RETURN              [reduce using rule 153 (nothing)]
+    MULTIPLY            [reduce using rule 51 (nested_declarations)]
+    OPEN_CURLY_BRACES   reduce using rule 39 ($@5)
+    OPEN_CURLY_BRACES   [reduce using rule 51 (nested_declarations)]
+    CLOSE_CURLY_BRACES  reduce using rule 26 (body_func)
+    CLOSE_CURLY_BRACES  [reduce using rule 51 (nested_declarations)]
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    COMMENT             [reduce using rule 51 (nested_declarations)]
+    VARIABLE_ID         [reduce using rule 51 (nested_declarations)]
+    $default            reduce using rule 26 (body_func)
+
+    function               go to state 47
+    body_func              go to state 86
+    nested_statments_func  go to state 49
+    statment_func          go to state 50
+    $@5                    go to state 51
+    function_call          go to state 52
+    function_lhs           go to state 53
+    nested_declarations    go to state 54
+    declaration            go to state 55
+    variable_declaration   go to state 56
+    string_array           go to state 57
+    conditions             go to state 58
+    loops                  go to state 59
+    assignment_statement   go to state 60
+    lhs                    go to state 61
+    type                   go to state 14
+    nothing                go to state 62
+
+
+State 76
+
+   48 function_lhs: VARIABLE_ID $@7 . OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES
+
+    OPEN_SQUARE_BRACES  shift, and go to state 99
+
+
+State 77
+
+   99 lhs: VARIABLE_ID $@18 . OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES
+
+    OPEN_SQUARE_BRACES  shift, and go to state 100
+
+
+State 78
+
+   10 function: VOID VARIABLE_ID $@3 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES . $@4
+
+    $default  reduce using rule 9 ($@4)
+
+    $@4  go to state 101
+
+
+State 79
+
+   25 body_func: nested_statments_func body_func .
+
+    $default  reduce using rule 25 (body_func)
+
+
+State 80
+
+   33 nested_statments_func: COMMENT . nested_statments_func
+   34                      | COMMENT .
+
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 80
+    VARIABLE_ID  shift, and go to state 46
+
+    IF                 [reduce using rule 34 (nested_statments_func)]
+    DO                 [reduce using rule 34 (nested_statments_func)]
+    WHILE              [reduce using rule 34 (nested_statments_func)]
+    FOR                [reduce using rule 34 (nested_statments_func)]
+    MULTIPLY           [reduce using rule 34 (nested_statments_func)]
+    OPEN_CURLY_BRACES  reduce using rule 34 (nested_statments_func)
+    OPEN_CURLY_BRACES  [reduce using rule 39 ($@5)]
+    COMMENT            [reduce using rule 34 (nested_statments_func)]
+    VARIABLE_ID        [reduce using rule 34 (nested_statments_func)]
+    $default           reduce using rule 34 (nested_statments_func)
+
+    nested_statments_func  go to state 102
+    statment_func          go to state 50
+    $@5                    go to state 51
+    function_call          go to state 52
+    function_lhs           go to state 53
+    conditions             go to state 58
+    loops                  go to state 59
+    assignment_statement   go to state 60
+    lhs                    go to state 61
+
+
+State 81
+
+   31 nested_statments_func: statment_func nested_statments_func .
+
+    $default  reduce using rule 31 (nested_statments_func)
+
+
+State 82
+
+   75 code_block: OPEN_CURLY_BRACES . body CLOSE_CURLY_BRACES
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    RETURN       shift, and go to state 90
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 103
+    VARIABLE_ID  shift, and go to state 46
+
+    CLOSE_CURLY_BRACES  reduce using rule 153 (nothing)
+    $default            reduce using rule 73 ($@11)
+
+    function              go to state 47
+    body                  go to state 104
+    function_call         go to state 105
+    function_lhs          go to state 53
+    nested_declarations   go to state 106
+    declaration           go to state 55
+    variable_declaration  go to state 56
+    string_array          go to state 57
+    nested_statments      go to state 107
+    statment              go to state 108
+    $@11                  go to state 109
+    conditions            go to state 110
+    loops                 go to state 111
+    assignment_statement  go to state 112
+    lhs                   go to state 61
+    return                go to state 113
+    type                  go to state 14
+    nothing               go to state 114
+
+
+State 83
+
+   40 statment_func: $@5 code_block .
+
+    $default  reduce using rule 40 (statment_func)
+
+
+State 84
+
+   35 statment_func: function_call SEMICOLON .
+
+    $default  reduce using rule 35 (statment_func)
+
+
+State 85
+
+   41 function_call: function_lhs OPEN_ANGLE_BRACES . function_call_params CLOSE_ANGLE_BRACES
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    $default  reduce using rule 153 (nothing)
+
+    function_call         go to state 129
+    function_call_params  go to state 130
+    function_lhs          go to state 53
+    exp                   go to state 131
+    primitiveType         go to state 132
+    nothing               go to state 133
+
+
+State 86
+
+   24 body_func: nested_declarations body_func .
+
+    $default  reduce using rule 24 (body_func)
+
+
+State 87
+
+   51 nested_declarations: COMMENT . nested_declarations
+   52                    | COMMENT .
+
+    BOOL     shift, and go to state 1
+    CHAR     shift, and go to state 2
+    CHAR_P   shift, and go to state 3
+    INT      shift, and go to state 4
+    INT_P    shift, and go to state 5
+    REAL     shift, and go to state 6
+    REAL_P   shift, and go to state 7
+    STRING   shift, and go to state 38
+    VOID     shift, and go to state 9
+    VAR      shift, and go to state 43
+    COMMENT  shift, and go to state 87
+
+    BOOL      [reduce using rule 52 (nested_declarations)]
+    CHAR      [reduce using rule 52 (nested_declarations)]
+    CHAR_P    [reduce using rule 52 (nested_declarations)]
+    INT       [reduce using rule 52 (nested_declarations)]
+    INT_P     [reduce using rule 52 (nested_declarations)]
+    REAL      [reduce using rule 52 (nested_declarations)]
+    REAL_P    [reduce using rule 52 (nested_declarations)]
+    STRING    [reduce using rule 52 (nested_declarations)]
+    VOID      [reduce using rule 52 (nested_declarations)]
+    VAR       [reduce using rule 52 (nested_declarations)]
+    COMMENT   [reduce using rule 52 (nested_declarations)]
+    $default  reduce using rule 52 (nested_declarations)
+
+    function              go to state 47
+    nested_declarations   go to state 134
+    declaration           go to state 55
+    variable_declaration  go to state 56
+    string_array          go to state 57
+    type                  go to state 14
+
+
+State 88
+
+   49 nested_declarations: declaration nested_declarations .
+
+    $default  reduce using rule 49 (nested_declarations)
+
+
+State 89
+
+   96 assignment_statement: lhs ASSIGNMENT . expressions SEMICOLON
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 135
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    $default  reduce using rule 153 (nothing)
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    expressions    go to state 136
+    exp            go to state 137
+    primitiveType  go to state 132
+    nothing        go to state 138
+
+
+State 90
+
+  103 return: RETURN . exp SEMICOLON
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 139
+    primitiveType  go to state 132
+
+
+State 91
+
+    7 function: type VARIABLE_ID $@1 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func return . CLOSE_CURLY_BRACES $@2
+
+    CLOSE_CURLY_BRACES  shift, and go to state 140
+
+
+State 92
+
+   63 string_array: STRING VARIABLE_ID $@10 . OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES SEMICOLON
+
+    OPEN_SQUARE_BRACES  shift, and go to state 141
+
+
+State 93
+
+   77 conditions: IF $@12 OPEN_ANGLE_BRACES . args_cond CLOSE_ANGLE_BRACES code_block
+
+    NOT                shift, and go to state 142
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    args_cond      go to state 143
+    exp            go to state 144
+    primitiveType  go to state 132
+
+
+State 94
+
+   80 conditions: IF $@13 OPEN_ANGLE_BRACES . args_cond CLOSE_ANGLE_BRACES code_block ELSE $@14 code_block
+
+    NOT                shift, and go to state 142
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    args_cond      go to state 145
+    exp            go to state 144
+    primitiveType  go to state 132
+
+
+State 95
+
+   84 loops: DO $@16 code_block . WHILE OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES SEMICOLON
+
+    WHILE  shift, and go to state 146
+
+
+State 96
+
+   82 loops: WHILE $@15 OPEN_ANGLE_BRACES . args_cond CLOSE_ANGLE_BRACES code_block
+
+    NOT                shift, and go to state 142
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    args_cond      go to state 147
+    exp            go to state 144
+    primitiveType  go to state 132
+
+
+State 97
+
+   86 loops: FOR $@17 OPEN_ANGLE_BRACES . init SEMICOLON args_cond SEMICOLON update CLOSE_ANGLE_BRACES code_block
+
+    MULTIPLY     shift, and go to state 44
+    VARIABLE_ID  shift, and go to state 148
+
+    lhs   go to state 149
+    init  go to state 150
+
+
+State 98
+
+   57 variable_declaration: VAR type VARIABLE_ID . $@8 temp
+
+    $default  reduce using rule 56 ($@8)
+
+    $@8  go to state 151
+
+
+State 99
+
+   48 function_lhs: VARIABLE_ID $@7 OPEN_SQUARE_BRACES . exp CLOSE_SQUARE_BRACES
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 152
+    primitiveType  go to state 132
+
+
+State 100
+
+   99 lhs: VARIABLE_ID $@18 OPEN_SQUARE_BRACES . string_exp CLOSE_SQUARE_BRACES
+
+    DECIMAL_LITERAL  shift, and go to state 153
+    HEX_LITERAL      shift, and go to state 154
+    VARIABLE_ID      shift, and go to state 155
+
+    string_exp       go to state 156
+    integer_literal  go to state 157
+
+
+State 101
+
+   10 function: VOID VARIABLE_ID $@3 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func CLOSE_CURLY_BRACES $@4 .
+
+    $default  reduce using rule 10 (function)
+
+
+State 102
+
+   33 nested_statments_func: COMMENT nested_statments_func .
+
+    $default  reduce using rule 33 (nested_statments_func)
+
+
+State 103
+
+   22 body: COMMENT . body
+   23     | COMMENT .
+   51 nested_declarations: COMMENT . nested_declarations
+   52                    | COMMENT .
+   66 nested_statments: COMMENT . nested_statments
+   67                 | COMMENT .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    RETURN       shift, and go to state 90
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 103
+    VARIABLE_ID  shift, and go to state 46
+
+    BOOL                [reduce using rule 52 (nested_declarations)]
+    BOOL                [reduce using rule 67 (nested_statments)]
+    CHAR                [reduce using rule 52 (nested_declarations)]
+    CHAR                [reduce using rule 67 (nested_statments)]
+    CHAR_P              [reduce using rule 52 (nested_declarations)]
+    CHAR_P              [reduce using rule 67 (nested_statments)]
+    INT                 [reduce using rule 52 (nested_declarations)]
+    INT                 [reduce using rule 67 (nested_statments)]
+    INT_P               [reduce using rule 52 (nested_declarations)]
+    INT_P               [reduce using rule 67 (nested_statments)]
+    REAL                [reduce using rule 52 (nested_declarations)]
+    REAL                [reduce using rule 67 (nested_statments)]
+    REAL_P              [reduce using rule 52 (nested_declarations)]
+    REAL_P              [reduce using rule 67 (nested_statments)]
+    STRING              [reduce using rule 52 (nested_declarations)]
+    STRING              [reduce using rule 67 (nested_statments)]
+    VOID                [reduce using rule 52 (nested_declarations)]
+    VOID                [reduce using rule 67 (nested_statments)]
+    IF                  [reduce using rule 52 (nested_declarations)]
+    IF                  [reduce using rule 67 (nested_statments)]
+    DO                  [reduce using rule 52 (nested_declarations)]
+    DO                  [reduce using rule 67 (nested_statments)]
+    WHILE               [reduce using rule 52 (nested_declarations)]
+    WHILE               [reduce using rule 67 (nested_statments)]
+    FOR                 [reduce using rule 52 (nested_declarations)]
+    FOR                 [reduce using rule 67 (nested_statments)]
+    VAR                 [reduce using rule 52 (nested_declarations)]
+    VAR                 [reduce using rule 67 (nested_statments)]
+    RETURN              [reduce using rule 52 (nested_declarations)]
+    RETURN              [reduce using rule 67 (nested_statments)]
+    MULTIPLY            [reduce using rule 52 (nested_declarations)]
+    MULTIPLY            [reduce using rule 67 (nested_statments)]
+    OPEN_CURLY_BRACES   reduce using rule 52 (nested_declarations)
+    OPEN_CURLY_BRACES   [reduce using rule 67 (nested_statments)]
+    OPEN_CURLY_BRACES   [reduce using rule 73 ($@11)]
+    CLOSE_CURLY_BRACES  reduce using rule 23 (body)
+    CLOSE_CURLY_BRACES  [reduce using rule 52 (nested_declarations)]
+    CLOSE_CURLY_BRACES  [reduce using rule 67 (nested_statments)]
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    COMMENT             [reduce using rule 52 (nested_declarations)]
+    COMMENT             [reduce using rule 67 (nested_statments)]
+    VARIABLE_ID         [reduce using rule 52 (nested_declarations)]
+    VARIABLE_ID         [reduce using rule 67 (nested_statments)]
+    $default            reduce using rule 23 (body)
+
+    function              go to state 47
+    body                  go to state 158
+    function_call         go to state 105
+    function_lhs          go to state 53
+    nested_declarations   go to state 159
+    declaration           go to state 55
+    variable_declaration  go to state 56
+    string_array          go to state 57
+    nested_statments      go to state 160
+    statment              go to state 108
+    $@11                  go to state 109
+    conditions            go to state 110
+    loops                 go to state 111
+    assignment_statement  go to state 112
+    lhs                   go to state 61
+    return                go to state 113
+    type                  go to state 14
+    nothing               go to state 114
+
+
+State 104
+
+   75 code_block: OPEN_CURLY_BRACES body . CLOSE_CURLY_BRACES
+
+    CLOSE_CURLY_BRACES  shift, and go to state 161
+
+
+State 105
+
+   68 statment: function_call . SEMICOLON
+
+    SEMICOLON  shift, and go to state 162
+
+
+State 106
+
+   17 body: nested_declarations . body
+   19     | nested_declarations .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    RETURN       shift, and go to state 90
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 103
+    VARIABLE_ID  shift, and go to state 46
+
+    OPEN_CURLY_BRACES   reduce using rule 73 ($@11)
+    CLOSE_CURLY_BRACES  reduce using rule 19 (body)
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    $default            reduce using rule 19 (body)
+
+    function              go to state 47
+    body                  go to state 163
+    function_call         go to state 105
+    function_lhs          go to state 53
+    nested_declarations   go to state 106
+    declaration           go to state 55
+    variable_declaration  go to state 56
+    string_array          go to state 57
+    nested_statments      go to state 107
+    statment              go to state 108
+    $@11                  go to state 109
+    conditions            go to state 110
+    loops                 go to state 111
+    assignment_statement  go to state 112
+    lhs                   go to state 61
+    return                go to state 113
+    type                  go to state 14
+    nothing               go to state 114
+
+
+State 107
+
+   18 body: nested_statments . body
+   20     | nested_statments .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    RETURN       shift, and go to state 90
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 103
+    VARIABLE_ID  shift, and go to state 46
+
+    OPEN_CURLY_BRACES   reduce using rule 73 ($@11)
+    CLOSE_CURLY_BRACES  reduce using rule 20 (body)
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    $default            reduce using rule 20 (body)
+
+    function              go to state 47
+    body                  go to state 164
+    function_call         go to state 105
+    function_lhs          go to state 53
+    nested_declarations   go to state 106
+    declaration           go to state 55
+    variable_declaration  go to state 56
+    string_array          go to state 57
+    nested_statments      go to state 107
+    statment              go to state 108
+    $@11                  go to state 109
+    conditions            go to state 110
+    loops                 go to state 111
+    assignment_statement  go to state 112
+    lhs                   go to state 61
+    return                go to state 113
+    type                  go to state 14
+    nothing               go to state 114
+
+
+State 108
+
+   64 nested_statments: statment . nested_statments
+   65                 | statment .
+
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    RETURN       shift, and go to state 90
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 165
+    VARIABLE_ID  shift, and go to state 46
+
+    IF                 [reduce using rule 65 (nested_statments)]
+    DO                 [reduce using rule 65 (nested_statments)]
+    WHILE              [reduce using rule 65 (nested_statments)]
+    FOR                [reduce using rule 65 (nested_statments)]
+    RETURN             [reduce using rule 65 (nested_statments)]
+    MULTIPLY           [reduce using rule 65 (nested_statments)]
+    OPEN_CURLY_BRACES  reduce using rule 65 (nested_statments)
+    OPEN_CURLY_BRACES  [reduce using rule 73 ($@11)]
+    COMMENT            [reduce using rule 65 (nested_statments)]
+    VARIABLE_ID        [reduce using rule 65 (nested_statments)]
+    $default           reduce using rule 65 (nested_statments)
+
+    function_call         go to state 105
+    function_lhs          go to state 53
+    nested_statments      go to state 166
+    statment              go to state 108
+    $@11                  go to state 109
+    conditions            go to state 110
+    loops                 go to state 111
+    assignment_statement  go to state 112
+    lhs                   go to state 61
+    return                go to state 113
+
+
+State 109
+
+   74 statment: $@11 . code_block
+
+    OPEN_CURLY_BRACES  shift, and go to state 82
+
+    code_block  go to state 167
+
+
+State 110
+
+   71 statment: conditions .
+
+    $default  reduce using rule 71 (statment)
+
+
+State 111
+
+   72 statment: loops .
+
+    $default  reduce using rule 72 (statment)
+
+
+State 112
+
+   69 statment: assignment_statement .
+
+    $default  reduce using rule 69 (statment)
+
+
+State 113
+
+   70 statment: return .
+
+    $default  reduce using rule 70 (statment)
+
+
+State 114
+
+   21 body: nothing .
+
+    $default  reduce using rule 21 (body)
+
+
+State 115
+
+  120 exp: NOT . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 168
+    primitiveType  go to state 132
+
+
+State 116
+
+  128 exp: MULTIPLY . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 169
+    primitiveType  go to state 132
+
+
+State 117
+
+  126 exp: ADDRESS . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 170
+    primitiveType  go to state 132
+
+
+State 118
+
+  124 exp: LENGTH . VARIABLE_ID LENGTH
+
+    VARIABLE_ID  shift, and go to state 171
+
+
+State 119
+
+  125 exp: OPEN_ANGLE_BRACES . exp CLOSE_ANGLE_BRACES
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 172
+    primitiveType  go to state 132
+
+
+State 120
+
+  143 primitiveType: NONE .
+
+    $default  reduce using rule 143 (primitiveType)
+
+
+State 121
+
+  144 primitiveType: BOOL_TRUE .
+
+    $default  reduce using rule 144 (primitiveType)
+
+
+State 122
+
+  145 primitiveType: BOOL_FALSE .
+
+    $default  reduce using rule 145 (primitiveType)
+
+
+State 123
+
+  146 primitiveType: CHAR_LITERAL .
+
+    $default  reduce using rule 146 (primitiveType)
+
+
+State 124
+
+  150 primitiveType: STRING_LITERAL .
+
+    $default  reduce using rule 150 (primitiveType)
+
+
+State 125
+
+  147 primitiveType: DECIMAL_LITERAL .
+
+    $default  reduce using rule 147 (primitiveType)
+
+
+State 126
+
+  148 primitiveType: HEX_LITERAL .
+
+    $default  reduce using rule 148 (primitiveType)
+
+
+State 127
+
+  149 primitiveType: REAL_LITERAL .
+
+    $default  reduce using rule 149 (primitiveType)
+
+
+State 128
+
+   46 function_lhs: VARIABLE_ID .
+   48             | VARIABLE_ID . $@7 OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES
+  121 exp: VARIABLE_ID .
+  127    | VARIABLE_ID . OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES
+
+    OPEN_SQUARE_BRACES  shift, and go to state 173
+
+    OPEN_ANGLE_BRACES   reduce using rule 46 (function_lhs)
+    OPEN_SQUARE_BRACES  [reduce using rule 47 ($@7)]
+    $default            reduce using rule 121 (exp)
+
+    $@7  go to state 76
+
+
+State 129
+
+  123 exp: function_call .
+
+    $default  reduce using rule 123 (exp)
+
+
+State 130
+
+   41 function_call: function_lhs OPEN_ANGLE_BRACES function_call_params . CLOSE_ANGLE_BRACES
+
+    CLOSE_ANGLE_BRACES  shift, and go to state 174
+
+
+State 131
+
+   43 function_call_params: exp . $@6 COMMA function_call_params
+   44                     | exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 175
+    DIVISION     shift, and go to state 176
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    MINUS        shift, and go to state 182
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+    PLUS         shift, and go to state 185
+    MULTIPLY     shift, and go to state 186
+
+    CLOSE_ANGLE_BRACES  reduce using rule 44 (function_call_params)
+    $default            reduce using rule 42 ($@6)
+
+    $@6  go to state 187
+
+
+State 132
+
+  122 exp: primitiveType .
+
+    $default  reduce using rule 122 (exp)
+
+
+State 133
+
+   45 function_call_params: nothing .
+
+    $default  reduce using rule 45 (function_call_params)
+
+
+State 134
+
+   51 nested_declarations: COMMENT nested_declarations .
+
+    $default  reduce using rule 51 (nested_declarations)
+
+
+State 135
+
+  106 expressions: OPEN_ANGLE_BRACES . exp CLOSE_ANGLE_BRACES
+  125 exp: OPEN_ANGLE_BRACES . exp CLOSE_ANGLE_BRACES
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 188
+    primitiveType  go to state 132
+
+
+State 136
+
+   96 assignment_statement: lhs ASSIGNMENT expressions . SEMICOLON
+
+    SEMICOLON  shift, and go to state 189
+
+
+State 137
+
+  104 expressions: exp . COMMA expressions
+  105            | exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 175
+    DIVISION     shift, and go to state 176
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    MINUS        shift, and go to state 182
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+    PLUS         shift, and go to state 185
+    MULTIPLY     shift, and go to state 186
+    COMMA        shift, and go to state 190
+
+    $default  reduce using rule 105 (expressions)
+
+
+State 138
+
+  107 expressions: nothing .
+
+    $default  reduce using rule 107 (expressions)
+
+
+State 139
+
+  103 return: RETURN exp . SEMICOLON
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 175
+    DIVISION     shift, and go to state 176
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    MINUS        shift, and go to state 182
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+    PLUS         shift, and go to state 185
+    MULTIPLY     shift, and go to state 186
+    SEMICOLON    shift, and go to state 191
+
+
+State 140
+
+    7 function: type VARIABLE_ID $@1 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES . $@2
+
+    $default  reduce using rule 6 ($@2)
+
+    $@2  go to state 192
+
+
+State 141
+
+   63 string_array: STRING VARIABLE_ID $@10 OPEN_SQUARE_BRACES . string_exp CLOSE_SQUARE_BRACES SEMICOLON
+
+    DECIMAL_LITERAL  shift, and go to state 153
+    HEX_LITERAL      shift, and go to state 154
+    VARIABLE_ID      shift, and go to state 155
+
+    string_exp       go to state 193
+    integer_literal  go to state 157
+
+
+State 142
+
+   95 args_cond: NOT . exp
+  120 exp: NOT . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 194
+    primitiveType  go to state 132
+
+
+State 143
+
+   77 conditions: IF $@12 OPEN_ANGLE_BRACES args_cond . CLOSE_ANGLE_BRACES code_block
+
+    CLOSE_ANGLE_BRACES  shift, and go to state 195
+
+
+State 144
+
+   87 args_cond: exp . EQL exp
+   88          | exp . NOT_EQL exp
+   89          | exp . LESS exp
+   90          | exp . LESS_EQL exp
+   91          | exp . GREATER exp
+   92          | exp . GREATER_EQL exp
+   93          | exp . OR exp
+   94          | exp . AND exp
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 196
+    DIVISION     shift, and go to state 176
+    EQL          shift, and go to state 197
+    GREATER      shift, and go to state 198
+    GREATER_EQL  shift, and go to state 199
+    LESS         shift, and go to state 200
+    LESS_EQL     shift, and go to state 201
+    MINUS        shift, and go to state 182
+    NOT_EQL      shift, and go to state 202
+    OR           shift, and go to state 203
+    PLUS         shift, and go to state 185
+    MULTIPLY     shift, and go to state 186
+
+
+State 145
+
+   80 conditions: IF $@13 OPEN_ANGLE_BRACES args_cond . CLOSE_ANGLE_BRACES code_block ELSE $@14 code_block
+
+    CLOSE_ANGLE_BRACES  shift, and go to state 204
+
+
+State 146
+
+   84 loops: DO $@16 code_block WHILE . OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES SEMICOLON
+
+    OPEN_ANGLE_BRACES  shift, and go to state 205
+
+
+State 147
+
+   82 loops: WHILE $@15 OPEN_ANGLE_BRACES args_cond . CLOSE_ANGLE_BRACES code_block
+
+    CLOSE_ANGLE_BRACES  shift, and go to state 206
+
+
+State 148
+
+   97 lhs: VARIABLE_ID .
+   99    | VARIABLE_ID . $@18 OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES
+
+    OPEN_SQUARE_BRACES  reduce using rule 98 ($@18)
+    $default            reduce using rule 97 (lhs)
+
+    $@18  go to state 77
+
+
+State 149
+
+  101 init: lhs . ASSIGNMENT integer_literal
+
+    ASSIGNMENT  shift, and go to state 207
+
+
+State 150
+
+   86 loops: FOR $@17 OPEN_ANGLE_BRACES init . SEMICOLON args_cond SEMICOLON update CLOSE_ANGLE_BRACES code_block
+
+    SEMICOLON  shift, and go to state 208
+
+
+State 151
+
+   57 variable_declaration: VAR type VARIABLE_ID $@8 . temp
+
+    ASSIGNMENT  shift, and go to state 209
+    SEMICOLON   shift, and go to state 210
+    COMMA       shift, and go to state 211
+
+    temp  go to state 212
+
+
+State 152
+
+   48 function_lhs: VARIABLE_ID $@7 OPEN_SQUARE_BRACES exp . CLOSE_SQUARE_BRACES
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND                  shift, and go to state 175
+    DIVISION             shift, and go to state 176
+    EQL                  shift, and go to state 177
+    GREATER              shift, and go to state 178
+    GREATER_EQL          shift, and go to state 179
+    LESS                 shift, and go to state 180
+    LESS_EQL             shift, and go to state 181
+    MINUS                shift, and go to state 182
+    NOT_EQL              shift, and go to state 183
+    OR                   shift, and go to state 184
+    PLUS                 shift, and go to state 185
+    MULTIPLY             shift, and go to state 186
+    CLOSE_SQUARE_BRACES  shift, and go to state 213
+
+
+State 153
+
+  151 integer_literal: DECIMAL_LITERAL .
+
+    $default  reduce using rule 151 (integer_literal)
+
+
+State 154
+
+  152 integer_literal: HEX_LITERAL .
+
+    $default  reduce using rule 152 (integer_literal)
+
+
+State 155
+
+  134 string_exp: VARIABLE_ID .
+
+    $default  reduce using rule 134 (string_exp)
+
+
+State 156
+
+   99 lhs: VARIABLE_ID $@18 OPEN_SQUARE_BRACES string_exp . CLOSE_SQUARE_BRACES
+  129 string_exp: string_exp . PLUS string_exp
+  130           | string_exp . MINUS string_exp
+  131           | string_exp . MULTIPLY string_exp
+  132           | string_exp . DIVISION string_exp
+
+    DIVISION             shift, and go to state 214
+    MINUS                shift, and go to state 215
+    PLUS                 shift, and go to state 216
+    MULTIPLY             shift, and go to state 217
+    CLOSE_SQUARE_BRACES  shift, and go to state 218
+
+
+State 157
+
+  133 string_exp: integer_literal .
+
+    $default  reduce using rule 133 (string_exp)
+
+
+State 158
+
+   22 body: COMMENT body .
+
+    $default  reduce using rule 22 (body)
+
+
+State 159
+
+   17 body: nested_declarations . body
+   19     | nested_declarations .
+   51 nested_declarations: COMMENT nested_declarations .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    RETURN       shift, and go to state 90
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 103
+    VARIABLE_ID  shift, and go to state 46
+
+    BOOL                [reduce using rule 51 (nested_declarations)]
+    CHAR                [reduce using rule 51 (nested_declarations)]
+    CHAR_P              [reduce using rule 51 (nested_declarations)]
+    INT                 [reduce using rule 51 (nested_declarations)]
+    INT_P               [reduce using rule 51 (nested_declarations)]
+    REAL                [reduce using rule 51 (nested_declarations)]
+    REAL_P              [reduce using rule 51 (nested_declarations)]
+    STRING              [reduce using rule 51 (nested_declarations)]
+    VOID                [reduce using rule 51 (nested_declarations)]
+    IF                  [reduce using rule 51 (nested_declarations)]
+    DO                  [reduce using rule 51 (nested_declarations)]
+    WHILE               [reduce using rule 51 (nested_declarations)]
+    FOR                 [reduce using rule 51 (nested_declarations)]
+    VAR                 [reduce using rule 51 (nested_declarations)]
+    RETURN              [reduce using rule 51 (nested_declarations)]
+    MULTIPLY            [reduce using rule 51 (nested_declarations)]
+    OPEN_CURLY_BRACES   reduce using rule 51 (nested_declarations)
+    OPEN_CURLY_BRACES   [reduce using rule 73 ($@11)]
+    CLOSE_CURLY_BRACES  reduce using rule 19 (body)
+    CLOSE_CURLY_BRACES  [reduce using rule 51 (nested_declarations)]
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    COMMENT             [reduce using rule 51 (nested_declarations)]
+    VARIABLE_ID         [reduce using rule 51 (nested_declarations)]
+    $default            reduce using rule 19 (body)
+
+    function              go to state 47
+    body                  go to state 163
+    function_call         go to state 105
+    function_lhs          go to state 53
+    nested_declarations   go to state 106
+    declaration           go to state 55
+    variable_declaration  go to state 56
+    string_array          go to state 57
+    nested_statments      go to state 107
+    statment              go to state 108
+    $@11                  go to state 109
+    conditions            go to state 110
+    loops                 go to state 111
+    assignment_statement  go to state 112
+    lhs                   go to state 61
+    return                go to state 113
+    type                  go to state 14
+    nothing               go to state 114
+
+
+State 160
+
+   18 body: nested_statments . body
+   20     | nested_statments .
+   66 nested_statments: COMMENT nested_statments .
+
+    BOOL         shift, and go to state 1
+    CHAR         shift, and go to state 2
+    CHAR_P       shift, and go to state 3
+    INT          shift, and go to state 4
+    INT_P        shift, and go to state 5
+    REAL         shift, and go to state 6
+    REAL_P       shift, and go to state 7
+    STRING       shift, and go to state 38
+    VOID         shift, and go to state 9
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    VAR          shift, and go to state 43
+    RETURN       shift, and go to state 90
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 103
+    VARIABLE_ID  shift, and go to state 46
+
+    BOOL                [reduce using rule 66 (nested_statments)]
+    CHAR                [reduce using rule 66 (nested_statments)]
+    CHAR_P              [reduce using rule 66 (nested_statments)]
+    INT                 [reduce using rule 66 (nested_statments)]
+    INT_P               [reduce using rule 66 (nested_statments)]
+    REAL                [reduce using rule 66 (nested_statments)]
+    REAL_P              [reduce using rule 66 (nested_statments)]
+    STRING              [reduce using rule 66 (nested_statments)]
+    VOID                [reduce using rule 66 (nested_statments)]
+    IF                  [reduce using rule 66 (nested_statments)]
+    DO                  [reduce using rule 66 (nested_statments)]
+    WHILE               [reduce using rule 66 (nested_statments)]
+    FOR                 [reduce using rule 66 (nested_statments)]
+    VAR                 [reduce using rule 66 (nested_statments)]
+    RETURN              [reduce using rule 66 (nested_statments)]
+    MULTIPLY            [reduce using rule 66 (nested_statments)]
+    OPEN_CURLY_BRACES   reduce using rule 66 (nested_statments)
+    OPEN_CURLY_BRACES   [reduce using rule 73 ($@11)]
+    CLOSE_CURLY_BRACES  reduce using rule 20 (body)
+    CLOSE_CURLY_BRACES  [reduce using rule 66 (nested_statments)]
+    CLOSE_CURLY_BRACES  [reduce using rule 153 (nothing)]
+    COMMENT             [reduce using rule 66 (nested_statments)]
+    VARIABLE_ID         [reduce using rule 66 (nested_statments)]
+    $default            reduce using rule 20 (body)
+
+    function              go to state 47
+    body                  go to state 164
+    function_call         go to state 105
+    function_lhs          go to state 53
+    nested_declarations   go to state 106
+    declaration           go to state 55
+    variable_declaration  go to state 56
+    string_array          go to state 57
+    nested_statments      go to state 107
+    statment              go to state 108
+    $@11                  go to state 109
+    conditions            go to state 110
+    loops                 go to state 111
+    assignment_statement  go to state 112
+    lhs                   go to state 61
+    return                go to state 113
+    type                  go to state 14
+    nothing               go to state 114
+
+
+State 161
+
+   75 code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES .
+
+    $default  reduce using rule 75 (code_block)
+
+
+State 162
+
+   68 statment: function_call SEMICOLON .
+
+    $default  reduce using rule 68 (statment)
+
+
+State 163
+
+   17 body: nested_declarations body .
+
+    $default  reduce using rule 17 (body)
+
+
+State 164
+
+   18 body: nested_statments body .
+
+    $default  reduce using rule 18 (body)
+
+
+State 165
+
+   66 nested_statments: COMMENT . nested_statments
+   67                 | COMMENT .
+
+    IF           shift, and go to state 39
+    DO           shift, and go to state 40
+    WHILE        shift, and go to state 41
+    FOR          shift, and go to state 42
+    RETURN       shift, and go to state 90
+    MULTIPLY     shift, and go to state 44
+    COMMENT      shift, and go to state 165
+    VARIABLE_ID  shift, and go to state 46
+
+    IF                 [reduce using rule 67 (nested_statments)]
+    DO                 [reduce using rule 67 (nested_statments)]
+    WHILE              [reduce using rule 67 (nested_statments)]
+    FOR                [reduce using rule 67 (nested_statments)]
+    RETURN             [reduce using rule 67 (nested_statments)]
+    MULTIPLY           [reduce using rule 67 (nested_statments)]
+    OPEN_CURLY_BRACES  reduce using rule 67 (nested_statments)
+    OPEN_CURLY_BRACES  [reduce using rule 73 ($@11)]
+    COMMENT            [reduce using rule 67 (nested_statments)]
+    VARIABLE_ID        [reduce using rule 67 (nested_statments)]
+    $default           reduce using rule 67 (nested_statments)
+
+    function_call         go to state 105
+    function_lhs          go to state 53
+    nested_statments      go to state 219
+    statment              go to state 108
+    $@11                  go to state 109
+    conditions            go to state 110
+    loops                 go to state 111
+    assignment_statement  go to state 112
+    lhs                   go to state 61
+    return                go to state 113
+
+
+State 166
+
+   64 nested_statments: statment nested_statments .
+
+    $default  reduce using rule 64 (nested_statments)
+
+
+State 167
+
+   74 statment: $@11 code_block .
+
+    $default  reduce using rule 74 (statment)
+
+
+State 168
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+  120    | NOT exp .
+
+    $default  reduce using rule 120 (exp)
+
+
+State 169
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+  128    | MULTIPLY exp .
+
+    AND          shift, and go to state 175
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+
+    $default  reduce using rule 128 (exp)
+
+
+State 170
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+  126    | ADDRESS exp .
+
+    $default  reduce using rule 126 (exp)
+
+
+State 171
+
+  124 exp: LENGTH VARIABLE_ID . LENGTH
+
+    LENGTH  shift, and go to state 220
+
+
+State 172
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+  125    | OPEN_ANGLE_BRACES exp . CLOSE_ANGLE_BRACES
+
+    AND                 shift, and go to state 175
+    DIVISION            shift, and go to state 176
+    EQL                 shift, and go to state 177
+    GREATER             shift, and go to state 178
+    GREATER_EQL         shift, and go to state 179
+    LESS                shift, and go to state 180
+    LESS_EQL            shift, and go to state 181
+    MINUS               shift, and go to state 182
+    NOT_EQL             shift, and go to state 183
+    OR                  shift, and go to state 184
+    PLUS                shift, and go to state 185
+    MULTIPLY            shift, and go to state 186
+    CLOSE_ANGLE_BRACES  shift, and go to state 221
+
+
+State 173
+
+  127 exp: VARIABLE_ID OPEN_SQUARE_BRACES . string_exp CLOSE_SQUARE_BRACES
+
+    DECIMAL_LITERAL  shift, and go to state 153
+    HEX_LITERAL      shift, and go to state 154
+    VARIABLE_ID      shift, and go to state 155
+
+    string_exp       go to state 222
+    integer_literal  go to state 157
+
+
+State 174
+
+   41 function_call: function_lhs OPEN_ANGLE_BRACES function_call_params CLOSE_ANGLE_BRACES .
+
+    $default  reduce using rule 41 (function_call)
+
+
+State 175
+
+  119 exp: exp AND . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 223
+    primitiveType  go to state 132
+
+
+State 176
+
+  111 exp: exp DIVISION . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 224
+    primitiveType  go to state 132
+
+
+State 177
+
+  112 exp: exp EQL . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 225
+    primitiveType  go to state 132
+
+
+State 178
+
+  116 exp: exp GREATER . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 226
+    primitiveType  go to state 132
+
+
+State 179
+
+  117 exp: exp GREATER_EQL . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 227
+    primitiveType  go to state 132
+
+
+State 180
+
+  114 exp: exp LESS . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 228
+    primitiveType  go to state 132
+
+
+State 181
+
+  115 exp: exp LESS_EQL . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 229
+    primitiveType  go to state 132
+
+
+State 182
+
+  109 exp: exp MINUS . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 230
+    primitiveType  go to state 132
+
+
+State 183
+
+  113 exp: exp NOT_EQL . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 231
+    primitiveType  go to state 132
+
+
+State 184
+
+  118 exp: exp OR . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 232
+    primitiveType  go to state 132
+
+
+State 185
+
+  108 exp: exp PLUS . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 233
+    primitiveType  go to state 132
+
+
+State 186
+
+  110 exp: exp MULTIPLY . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 234
+    primitiveType  go to state 132
+
+
+State 187
+
+   43 function_call_params: exp $@6 . COMMA function_call_params
+
+    COMMA  shift, and go to state 235
+
+
+State 188
+
+  106 expressions: OPEN_ANGLE_BRACES exp . CLOSE_ANGLE_BRACES
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+  125    | OPEN_ANGLE_BRACES exp . CLOSE_ANGLE_BRACES
+
+    AND                 shift, and go to state 175
+    DIVISION            shift, and go to state 176
+    EQL                 shift, and go to state 177
+    GREATER             shift, and go to state 178
+    GREATER_EQL         shift, and go to state 179
+    LESS                shift, and go to state 180
+    LESS_EQL            shift, and go to state 181
+    MINUS               shift, and go to state 182
+    NOT_EQL             shift, and go to state 183
+    OR                  shift, and go to state 184
+    PLUS                shift, and go to state 185
+    MULTIPLY            shift, and go to state 186
+    CLOSE_ANGLE_BRACES  shift, and go to state 236
+
+
+State 189
+
+   96 assignment_statement: lhs ASSIGNMENT expressions SEMICOLON .
+
+    $default  reduce using rule 96 (assignment_statement)
+
+
+State 190
+
+  104 expressions: exp COMMA . expressions
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 135
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    $default  reduce using rule 153 (nothing)
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    expressions    go to state 237
+    exp            go to state 137
+    primitiveType  go to state 132
+    nothing        go to state 138
+
+
+State 191
+
+  103 return: RETURN exp SEMICOLON .
+
+    $default  reduce using rule 103 (return)
+
+
+State 192
+
+    7 function: type VARIABLE_ID $@1 OPEN_ANGLE_BRACES parameter_list CLOSE_ANGLE_BRACES OPEN_CURLY_BRACES body_func return CLOSE_CURLY_BRACES $@2 .
+
+    $default  reduce using rule 7 (function)
+
+
+State 193
+
+   63 string_array: STRING VARIABLE_ID $@10 OPEN_SQUARE_BRACES string_exp . CLOSE_SQUARE_BRACES SEMICOLON
+  129 string_exp: string_exp . PLUS string_exp
+  130           | string_exp . MINUS string_exp
+  131           | string_exp . MULTIPLY string_exp
+  132           | string_exp . DIVISION string_exp
+
+    DIVISION             shift, and go to state 214
+    MINUS                shift, and go to state 215
+    PLUS                 shift, and go to state 216
+    MULTIPLY             shift, and go to state 217
+    CLOSE_SQUARE_BRACES  shift, and go to state 238
+
+
+State 194
+
+   95 args_cond: NOT exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+  120    | NOT exp .
+
+    SEMICOLON           reduce using rule 95 (args_cond)
+    CLOSE_ANGLE_BRACES  reduce using rule 95 (args_cond)
+    $default            reduce using rule 120 (exp)
+
+
+State 195
+
+   77 conditions: IF $@12 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES . code_block
+
+    OPEN_CURLY_BRACES  shift, and go to state 82
+
+    code_block  go to state 239
+
+
+State 196
+
+   94 args_cond: exp AND . exp
+  119 exp: exp AND . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 240
+    primitiveType  go to state 132
+
+
+State 197
+
+   87 args_cond: exp EQL . exp
+  112 exp: exp EQL . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 241
+    primitiveType  go to state 132
+
+
+State 198
+
+   91 args_cond: exp GREATER . exp
+  116 exp: exp GREATER . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 242
+    primitiveType  go to state 132
+
+
+State 199
+
+   92 args_cond: exp GREATER_EQL . exp
+  117 exp: exp GREATER_EQL . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 243
+    primitiveType  go to state 132
+
+
+State 200
+
+   89 args_cond: exp LESS . exp
+  114 exp: exp LESS . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 244
+    primitiveType  go to state 132
+
+
+State 201
+
+   90 args_cond: exp LESS_EQL . exp
+  115 exp: exp LESS_EQL . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 245
+    primitiveType  go to state 132
+
+
+State 202
+
+   88 args_cond: exp NOT_EQL . exp
+  113 exp: exp NOT_EQL . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 246
+    primitiveType  go to state 132
+
+
+State 203
+
+   93 args_cond: exp OR . exp
+  118 exp: exp OR . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 247
+    primitiveType  go to state 132
+
+
+State 204
+
+   80 conditions: IF $@13 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES . code_block ELSE $@14 code_block
+
+    OPEN_CURLY_BRACES  shift, and go to state 82
+
+    code_block  go to state 248
+
+
+State 205
+
+   84 loops: DO $@16 code_block WHILE OPEN_ANGLE_BRACES . args_cond CLOSE_ANGLE_BRACES SEMICOLON
+
+    NOT                shift, and go to state 142
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    args_cond      go to state 249
+    exp            go to state 144
+    primitiveType  go to state 132
+
+
+State 206
+
+   82 loops: WHILE $@15 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES . code_block
+
+    OPEN_CURLY_BRACES  shift, and go to state 82
+
+    code_block  go to state 250
+
+
+State 207
+
+  101 init: lhs ASSIGNMENT . integer_literal
+
+    DECIMAL_LITERAL  shift, and go to state 153
+    HEX_LITERAL      shift, and go to state 154
+
+    integer_literal  go to state 251
+
+
+State 208
+
+   86 loops: FOR $@17 OPEN_ANGLE_BRACES init SEMICOLON . args_cond SEMICOLON update CLOSE_ANGLE_BRACES code_block
+
+    NOT                shift, and go to state 142
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    args_cond      go to state 252
+    exp            go to state 144
+    primitiveType  go to state 132
+
+
+State 209
+
+   61 temp: ASSIGNMENT . exp SEMICOLON
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 253
+    primitiveType  go to state 132
+
+
+State 210
+
+   60 temp: SEMICOLON .
+
+    $default  reduce using rule 60 (temp)
+
+
+State 211
+
+   59 temp: COMMA . VARIABLE_ID $@9 temp
+
+    VARIABLE_ID  shift, and go to state 254
+
+
+State 212
+
+   57 variable_declaration: VAR type VARIABLE_ID $@8 temp .
+
+    $default  reduce using rule 57 (variable_declaration)
+
+
+State 213
+
+   48 function_lhs: VARIABLE_ID $@7 OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES .
+
+    $default  reduce using rule 48 (function_lhs)
+
+
+State 214
+
+  132 string_exp: string_exp DIVISION . string_exp
+
+    DECIMAL_LITERAL  shift, and go to state 153
+    HEX_LITERAL      shift, and go to state 154
+    VARIABLE_ID      shift, and go to state 155
+
+    string_exp       go to state 255
+    integer_literal  go to state 157
+
+
+State 215
+
+  130 string_exp: string_exp MINUS . string_exp
+
+    DECIMAL_LITERAL  shift, and go to state 153
+    HEX_LITERAL      shift, and go to state 154
+    VARIABLE_ID      shift, and go to state 155
+
+    string_exp       go to state 256
+    integer_literal  go to state 157
+
+
+State 216
+
+  129 string_exp: string_exp PLUS . string_exp
+
+    DECIMAL_LITERAL  shift, and go to state 153
+    HEX_LITERAL      shift, and go to state 154
+    VARIABLE_ID      shift, and go to state 155
+
+    string_exp       go to state 257
+    integer_literal  go to state 157
+
+
+State 217
+
+  131 string_exp: string_exp MULTIPLY . string_exp
+
+    DECIMAL_LITERAL  shift, and go to state 153
+    HEX_LITERAL      shift, and go to state 154
+    VARIABLE_ID      shift, and go to state 155
+
+    string_exp       go to state 258
+    integer_literal  go to state 157
+
+
+State 218
+
+   99 lhs: VARIABLE_ID $@18 OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES .
+
+    $default  reduce using rule 99 (lhs)
+
+
+State 219
+
+   66 nested_statments: COMMENT nested_statments .
+
+    $default  reduce using rule 66 (nested_statments)
+
+
+State 220
+
+  124 exp: LENGTH VARIABLE_ID LENGTH .
+
+    $default  reduce using rule 124 (exp)
+
+
+State 221
+
+  125 exp: OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES .
+
+    $default  reduce using rule 125 (exp)
+
+
+State 222
+
+  127 exp: VARIABLE_ID OPEN_SQUARE_BRACES string_exp . CLOSE_SQUARE_BRACES
+  129 string_exp: string_exp . PLUS string_exp
+  130           | string_exp . MINUS string_exp
+  131           | string_exp . MULTIPLY string_exp
+  132           | string_exp . DIVISION string_exp
+
+    DIVISION             shift, and go to state 214
+    MINUS                shift, and go to state 215
+    PLUS                 shift, and go to state 216
+    MULTIPLY             shift, and go to state 217
+    CLOSE_SQUARE_BRACES  shift, and go to state 259
+
+
+State 223
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+  119    | exp AND exp .
+
+    $default  reduce using rule 119 (exp)
+
+
+State 224
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  111    | exp DIVISION exp .
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 175
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+
+    $default  reduce using rule 111 (exp)
+
+
+State 225
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  112    | exp EQL exp .
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    $default  reduce using rule 112 (exp)
+
+
+State 226
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  116    | exp GREATER exp .
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    $default  reduce using rule 116 (exp)
+
+
+State 227
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  117    | exp GREATER_EQL exp .
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    $default  reduce using rule 117 (exp)
+
+
+State 228
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  114    | exp LESS exp .
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    $default  reduce using rule 114 (exp)
+
+
+State 229
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  115    | exp LESS_EQL exp .
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    $default  reduce using rule 115 (exp)
+
+
+State 230
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  109    | exp MINUS exp .
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 175
+    DIVISION     shift, and go to state 176
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+    MULTIPLY     shift, and go to state 186
+
+    $default  reduce using rule 109 (exp)
+
+
+State 231
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  113    | exp NOT_EQL exp .
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    $default  reduce using rule 113 (exp)
+
+
+State 232
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  118    | exp OR exp .
+  119    | exp . AND exp
+
+    $default  reduce using rule 118 (exp)
+
+
+State 233
+
+  108 exp: exp . PLUS exp
+  108    | exp PLUS exp .
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 175
+    DIVISION     shift, and go to state 176
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+    MULTIPLY     shift, and go to state 186
+
+    $default  reduce using rule 108 (exp)
+
+
+State 234
+
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  110    | exp MULTIPLY exp .
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 175
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+
+    $default  reduce using rule 110 (exp)
+
+
+State 235
+
+   43 function_call_params: exp $@6 COMMA . function_call_params
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    $default  reduce using rule 153 (nothing)
+
+    function_call         go to state 129
+    function_call_params  go to state 260
+    function_lhs          go to state 53
+    exp                   go to state 131
+    primitiveType         go to state 132
+    nothing               go to state 133
+
+
+State 236
+
+  106 expressions: OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES .
+  125 exp: OPEN_ANGLE_BRACES exp CLOSE_ANGLE_BRACES .
+
+    SEMICOLON  reduce using rule 106 (expressions)
+    SEMICOLON  [reduce using rule 125 (exp)]
+    $default   reduce using rule 125 (exp)
+
+
+State 237
+
+  104 expressions: exp COMMA expressions .
+
+    $default  reduce using rule 104 (expressions)
+
+
+State 238
+
+   63 string_array: STRING VARIABLE_ID $@10 OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES . SEMICOLON
+
+    SEMICOLON  shift, and go to state 261
+
+
+State 239
+
+   77 conditions: IF $@12 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block .
+
+    $default  reduce using rule 77 (conditions)
+
+
+State 240
+
+   94 args_cond: exp AND exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+  119    | exp AND exp .
+
+    SEMICOLON           reduce using rule 94 (args_cond)
+    CLOSE_ANGLE_BRACES  reduce using rule 94 (args_cond)
+    $default            reduce using rule 119 (exp)
+
+
+State 241
+
+   87 args_cond: exp EQL exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  112    | exp EQL exp .
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    SEMICOLON           reduce using rule 87 (args_cond)
+    CLOSE_ANGLE_BRACES  reduce using rule 87 (args_cond)
+    $default            reduce using rule 112 (exp)
+
+
+State 242
+
+   91 args_cond: exp GREATER exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  116    | exp GREATER exp .
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    SEMICOLON           reduce using rule 91 (args_cond)
+    CLOSE_ANGLE_BRACES  reduce using rule 91 (args_cond)
+    $default            reduce using rule 116 (exp)
+
+
+State 243
+
+   92 args_cond: exp GREATER_EQL exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  117    | exp GREATER_EQL exp .
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    SEMICOLON           reduce using rule 92 (args_cond)
+    CLOSE_ANGLE_BRACES  reduce using rule 92 (args_cond)
+    $default            reduce using rule 117 (exp)
+
+
+State 244
+
+   89 args_cond: exp LESS exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  114    | exp LESS exp .
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    SEMICOLON           reduce using rule 89 (args_cond)
+    CLOSE_ANGLE_BRACES  reduce using rule 89 (args_cond)
+    $default            reduce using rule 114 (exp)
+
+
+State 245
+
+   90 args_cond: exp LESS_EQL exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  115    | exp LESS_EQL exp .
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    SEMICOLON           reduce using rule 90 (args_cond)
+    CLOSE_ANGLE_BRACES  reduce using rule 90 (args_cond)
+    $default            reduce using rule 115 (exp)
+
+
+State 246
+
+   88 args_cond: exp NOT_EQL exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  113    | exp NOT_EQL exp .
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND  shift, and go to state 175
+    OR   shift, and go to state 184
+
+    SEMICOLON           reduce using rule 88 (args_cond)
+    CLOSE_ANGLE_BRACES  reduce using rule 88 (args_cond)
+    $default            reduce using rule 113 (exp)
+
+
+State 247
+
+   93 args_cond: exp OR exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  118    | exp OR exp .
+  119    | exp . AND exp
+
+    SEMICOLON           reduce using rule 93 (args_cond)
+    CLOSE_ANGLE_BRACES  reduce using rule 93 (args_cond)
+    $default            reduce using rule 118 (exp)
+
+
+State 248
+
+   80 conditions: IF $@13 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block . ELSE $@14 code_block
+
+    ELSE  shift, and go to state 262
+
+
+State 249
+
+   84 loops: DO $@16 code_block WHILE OPEN_ANGLE_BRACES args_cond . CLOSE_ANGLE_BRACES SEMICOLON
+
+    CLOSE_ANGLE_BRACES  shift, and go to state 263
+
+
+State 250
+
+   82 loops: WHILE $@15 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block .
+
+    $default  reduce using rule 82 (loops)
+
+
+State 251
+
+  101 init: lhs ASSIGNMENT integer_literal .
+
+    $default  reduce using rule 101 (init)
+
+
+State 252
+
+   86 loops: FOR $@17 OPEN_ANGLE_BRACES init SEMICOLON args_cond . SEMICOLON update CLOSE_ANGLE_BRACES code_block
+
+    SEMICOLON  shift, and go to state 264
+
+
+State 253
+
+   61 temp: ASSIGNMENT exp . SEMICOLON
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 175
+    DIVISION     shift, and go to state 176
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    MINUS        shift, and go to state 182
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+    PLUS         shift, and go to state 185
+    MULTIPLY     shift, and go to state 186
+    SEMICOLON    shift, and go to state 265
+
+
+State 254
+
+   59 temp: COMMA VARIABLE_ID . $@9 temp
+
+    $default  reduce using rule 58 ($@9)
+
+    $@9  go to state 266
+
+
+State 255
+
+  129 string_exp: string_exp . PLUS string_exp
+  130           | string_exp . MINUS string_exp
+  131           | string_exp . MULTIPLY string_exp
+  132           | string_exp . DIVISION string_exp
+  132           | string_exp DIVISION string_exp .
+
+    $default  reduce using rule 132 (string_exp)
+
+
+State 256
+
+  129 string_exp: string_exp . PLUS string_exp
+  130           | string_exp . MINUS string_exp
+  130           | string_exp MINUS string_exp .
+  131           | string_exp . MULTIPLY string_exp
+  132           | string_exp . DIVISION string_exp
+
+    DIVISION  shift, and go to state 214
+    MULTIPLY  shift, and go to state 217
+
+    $default  reduce using rule 130 (string_exp)
+
+
+State 257
+
+  129 string_exp: string_exp . PLUS string_exp
+  129           | string_exp PLUS string_exp .
+  130           | string_exp . MINUS string_exp
+  131           | string_exp . MULTIPLY string_exp
+  132           | string_exp . DIVISION string_exp
+
+    DIVISION  shift, and go to state 214
+    MULTIPLY  shift, and go to state 217
+
+    $default  reduce using rule 129 (string_exp)
+
+
+State 258
+
+  129 string_exp: string_exp . PLUS string_exp
+  130           | string_exp . MINUS string_exp
+  131           | string_exp . MULTIPLY string_exp
+  131           | string_exp MULTIPLY string_exp .
+  132           | string_exp . DIVISION string_exp
+
+    $default  reduce using rule 131 (string_exp)
+
+
+State 259
+
+  127 exp: VARIABLE_ID OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES .
+
+    $default  reduce using rule 127 (exp)
+
+
+State 260
+
+   43 function_call_params: exp $@6 COMMA function_call_params .
+
+    $default  reduce using rule 43 (function_call_params)
+
+
+State 261
+
+   63 string_array: STRING VARIABLE_ID $@10 OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES SEMICOLON .
+
+    $default  reduce using rule 63 (string_array)
+
+
+State 262
+
+   80 conditions: IF $@13 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block ELSE . $@14 code_block
+
+    $default  reduce using rule 79 ($@14)
+
+    $@14  go to state 267
+
+
+State 263
+
+   84 loops: DO $@16 code_block WHILE OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES . SEMICOLON
+
+    SEMICOLON  shift, and go to state 268
+
+
+State 264
+
+   86 loops: FOR $@17 OPEN_ANGLE_BRACES init SEMICOLON args_cond SEMICOLON . update CLOSE_ANGLE_BRACES code_block
+
+    MULTIPLY     shift, and go to state 44
+    VARIABLE_ID  shift, and go to state 148
+
+    lhs     go to state 269
+    update  go to state 270
+
+
+State 265
+
+   61 temp: ASSIGNMENT exp SEMICOLON .
+
+    $default  reduce using rule 61 (temp)
+
+
+State 266
+
+   59 temp: COMMA VARIABLE_ID $@9 . temp
+
+    ASSIGNMENT  shift, and go to state 209
+    SEMICOLON   shift, and go to state 210
+    COMMA       shift, and go to state 211
+
+    temp  go to state 271
+
+
+State 267
+
+   80 conditions: IF $@13 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block ELSE $@14 . code_block
+
+    OPEN_CURLY_BRACES  shift, and go to state 82
+
+    code_block  go to state 272
+
+
+State 268
+
+   84 loops: DO $@16 code_block WHILE OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES SEMICOLON .
+
+    $default  reduce using rule 84 (loops)
+
+
+State 269
+
+  102 update: lhs . ASSIGNMENT exp
+
+    ASSIGNMENT  shift, and go to state 273
+
+
+State 270
+
+   86 loops: FOR $@17 OPEN_ANGLE_BRACES init SEMICOLON args_cond SEMICOLON update . CLOSE_ANGLE_BRACES code_block
+
+    CLOSE_ANGLE_BRACES  shift, and go to state 274
+
+
+State 271
+
+   59 temp: COMMA VARIABLE_ID $@9 temp .
+
+    $default  reduce using rule 59 (temp)
+
+
+State 272
+
+   80 conditions: IF $@13 OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block ELSE $@14 code_block .
+
+    $default  reduce using rule 80 (conditions)
+
+
+State 273
+
+  102 update: lhs ASSIGNMENT . exp
+
+    NOT                shift, and go to state 115
+    MULTIPLY           shift, and go to state 116
+    ADDRESS            shift, and go to state 117
+    LENGTH             shift, and go to state 118
+    OPEN_ANGLE_BRACES  shift, and go to state 119
+    NONE               shift, and go to state 120
+    BOOL_TRUE          shift, and go to state 121
+    BOOL_FALSE         shift, and go to state 122
+    CHAR_LITERAL       shift, and go to state 123
+    STRING_LITERAL     shift, and go to state 124
+    DECIMAL_LITERAL    shift, and go to state 125
+    HEX_LITERAL        shift, and go to state 126
+    REAL_LITERAL       shift, and go to state 127
+    VARIABLE_ID        shift, and go to state 128
+
+    function_call  go to state 129
+    function_lhs   go to state 53
+    exp            go to state 275
+    primitiveType  go to state 132
+
+
+State 274
+
+   86 loops: FOR $@17 OPEN_ANGLE_BRACES init SEMICOLON args_cond SEMICOLON update CLOSE_ANGLE_BRACES . code_block
+
+    OPEN_CURLY_BRACES  shift, and go to state 82
+
+    code_block  go to state 276
+
+
+State 275
+
+  102 update: lhs ASSIGNMENT exp .
+  108 exp: exp . PLUS exp
+  109    | exp . MINUS exp
+  110    | exp . MULTIPLY exp
+  111    | exp . DIVISION exp
+  112    | exp . EQL exp
+  113    | exp . NOT_EQL exp
+  114    | exp . LESS exp
+  115    | exp . LESS_EQL exp
+  116    | exp . GREATER exp
+  117    | exp . GREATER_EQL exp
+  118    | exp . OR exp
+  119    | exp . AND exp
+
+    AND          shift, and go to state 175
+    DIVISION     shift, and go to state 176
+    EQL          shift, and go to state 177
+    GREATER      shift, and go to state 178
+    GREATER_EQL  shift, and go to state 179
+    LESS         shift, and go to state 180
+    LESS_EQL     shift, and go to state 181
+    MINUS        shift, and go to state 182
+    NOT_EQL      shift, and go to state 183
+    OR           shift, and go to state 184
+    PLUS         shift, and go to state 185
+    MULTIPLY     shift, and go to state 186
+
+    $default  reduce using rule 102 (update)
+
+
+State 276
+
+   86 loops: FOR $@17 OPEN_ANGLE_BRACES init SEMICOLON args_cond SEMICOLON update CLOSE_ANGLE_BRACES code_block .
+
+    $default  reduce using rule 86 (loops)
