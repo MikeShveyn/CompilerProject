@@ -142,8 +142,8 @@
 
 
 // NODES FUNCTIONS 
-%type<node> program code function  parameter_list body_func body return argument nothing statment_func declaration
-%type<node> nested_declarations nested_statments nested_statments_func type code_block assignment_statement conditions loops  statment
+%type<node> program code function  parameter_list body_func body return argument nothing statment_func declaration if_statment else_statment
+%type<node> nested_declarations nested_statments nested_statments_func type code_block assignment_statement  loops  statment
 %type<node> init update integer_literal variable_declaration variableL atributeList string_exp string_array function_call_params 
 %type<node2> exp expressions  primitiveType args_cond vrd_temp lhs function_call function_lhs
 
@@ -223,7 +223,7 @@ nested_statments_func:
 statment_func:
 		 function_call SEMICOLON  {$$=mknode("",$1->node, NULL);}
 	   | assignment_statement {$$=mknode("",$1,NULL);}
-	   | IF {add('K');} conditions {$$=mknode("",$3,NULL);}
+	   | if_statment {$$=mknode("",$1,NULL);}
 	   | loops {$$=mknode("",$1,NULL);}
 	   | {add('B');}code_block { $$=mknode("",$2,NULL);}
 	   ;
@@ -294,17 +294,20 @@ statment:
 	     function_call SEMICOLON {$$=mknode("",$1->node, NULL);}
 	   | assignment_statement   {$$=mknode("",$1,NULL);}
 	   | return  {$$=mknode("",$1,NULL);}
-	   | IF {add('K');} conditions {$$=mknode("",$3,NULL);}
+	   | if_statment {$$=mknode("",$1,NULL);}
 	   | loops {$$=mknode("",$1,NULL);}
 	   | {add('B');} code_block {$$=mknode("CODE_BLOCK",$2,NULL);}
 	   ;
 
 code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES {endScope(); $$=mknode("CODE_BLOCK",$2,NULL);};
 
-conditions: 
-	  OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block  {if_label_rep(); $$=mknode("IF",$2->node,$4);}
-	| OPEN_ANGLE_BRACES  args_cond CLOSE_ANGLE_BRACES code_block ELSE {if_label_rep(); add('K');} code_block {if_label_else(); $$=mknode("IF-ELSE", mknode("",$2->node,$4), mknode("",$7,NULL));}
-	|{if_label_else();}
+if_statment: 
+	IF {add('K');} OPEN_ANGLE_BRACES args_cond {if_label_rep();} CLOSE_ANGLE_BRACES code_block else_statment {$$=mknode("IF", $4->node, mknode("", $7, $8));}
+	;
+
+else_statment: 
+	 ELSE {add('K');} code_block {$$=mknode("ELSE", $3, NULL);}
+	|nothing {if_label_else(); $$=mknode("",$1,NULL);}
 	;
 
 loops:
@@ -313,7 +316,7 @@ loops:
 	| FOR {add('K');} OPEN_ANGLE_BRACES init SEMICOLON {for_inter();} args_cond  SEMICOLON {for_rep();} update  CLOSE_ANGLE_BRACES code_block { $$=mknode("FOR",mknode("INIT", $4, mknode("COND", $7->node, mknode("UPDATE",$10, NULL))),$12);}
 	;  
 
-args_cond : 
+args_cond: 
 	 exp EQL exp {$$=mknode2("==",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log2", "=="));}							
 	| exp NOT_EQL exp {$$=mknode2("!=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log2", "!="));}							
 	| exp LESS exp {$$=mknode2("<",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3", "<"));}									
@@ -338,7 +341,7 @@ init:  lhs ASSIGNMENT {push($2);} integer_literal { $$=mknode("=",$1->node,$4);}
 	
 update: lhs ASSIGNMENT {push($2);} exp {$$=mknode("=",$1->node,$4->node);};
 
-return: RETURN exp SEMICOLON {check_return_type($2->type); $$=mknode("RET-VAL",$2->node,NULL);} ;
+return: RETURN exp SEMICOLON {{fprintf(f1,"\tReturn t%d\n",ind-1);}check_return_type($2->type); $$=mknode("RET-VAL",$2->node,NULL);} ;
 
 
  /* Expression */
@@ -570,19 +573,16 @@ void for_rep()
 void if_label_start()
 {
  	lnum++;
- 	fprintf(f1,"\tif( not");
+ 	fprintf(f1,"\tif( not ");
  	
 }
 
 void if_label_rep()
 {	
-	fprintf(f1,"\tgoto L%d\n",lnum);
  	label[++ltop]=lnum;
 	int x;
-	lnum++;
 	x=label[ltop--]; 
-	fprintf(f1,"\tgoto L%d\n",lnum);
-	fprintf(f1,"L%d:",x); 
+	fprintf(f1,") goto L%d\n",lnum);
 	label[++ltop]=lnum;
 }
 
@@ -596,13 +596,12 @@ void if_label_else()
 
 void push(char * str)
 {	
-	printf("inPush Top %d StackTop %s YYTEXT %s\n", top, st[top], str);
   	strcpy(st[++top],str);
 }
 
 
 void func_call_gen() {
-	function_call_tac = 1;
+	function_call_tac = 2;
 	ind = 0;
 	sprintf(temp_var,"t%d",ind); 
 	fprintf(f1,"\t%s=%s\n",temp_var,st[top]);
@@ -618,7 +617,7 @@ void func_call_gen() {
 
 void logical_gen(char * op)
 {
-	function_call_tac = 1;
+	function_call_tac = 0;
  	sprintf(temp_var,"t%d",ind);
   	fprintf(f1,"%s%s%s",st[top-1],op,st[top]);
   	top-=2;
@@ -639,14 +638,17 @@ void algebric_gen(char * op)
 
 void codegen_assign()
 {
-		printf("inCode assign %d %s %s\n", top, st[top], st[top-1]);
-		sprintf(temp_var,"t%d",ind);
+	sprintf(temp_var,"t%d",ind);
 	if(function_call_tac == 0){
 		fprintf(f1,"\t%s=%s\n",temp_var,st[top]);
 		fprintf(f1,"\t%s=%s\n",st[top-1],temp_var);
 		top-=2;
-	}else{
+	}else if(function_call_tac == 2){
 		fprintf(f1,"\t%s=%s\n",st[top],temp_var);
+		function_call_tac = 0;
+		top-=1;
+	}else{
+		fprintf(f1,"\t%s=%s\n",temp_var,st[top]);
 		function_call_tac = 0;
 		top-=1;
 	}
@@ -838,6 +840,10 @@ void add(char c) {
 
 			if(strcmp(yytext, "if")==0) {
 				if_label_start(); 
+			}
+
+			if(strcmp(yytext, "else")==0) {
+				if_label_else(); 
 			}
 
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);

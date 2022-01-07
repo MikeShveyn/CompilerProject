@@ -2,23 +2,22 @@ foo:
 	BeginFunc
 	t0=23
 	a=t0
-	if( nota==23	10=t1
-	goto L1
-	goto L2
-L1:	t1=19
+	if( not a==23) goto L1
+	t1=10
 	a=t1
-L2:	t2=2+a
+L1:	t2=2+a
+	Return t2
 	EndFunc
 main:
 	BeginFunc
-	0=t3
-L3:	if( not a<10)	goto L4
+	t3=0
+L2:	if( not a<10)	goto L3
 	t0=3.14
 	PushParam t0: 
 	t1 = LCall foo: 
 	PopParams 4: 
 	b=t1
-	t2=2+2
-	t2=t3
-	goto L3
-L4:	EndFunc
+	t2=a+a
+	t3=t2
+	goto L2
+L3:	EndFunc
