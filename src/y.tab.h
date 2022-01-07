@@ -82,10 +82,10 @@ extern int yydebug;
     ADDRESS = 288,
     LENGTH = 289,
     SEMICOLON = 290,
-    COLON = 291,
-    COMMA = 292,
-    OPEN_CURLY_BRACES = 293,
-    CLOSE_CURLY_BRACES = 294,
+    COMMA = 291,
+    OPEN_CURLY_BRACES = 292,
+    CLOSE_CURLY_BRACES = 293,
+    COLON = 294,
     OPEN_ANGLE_BRACES = 295,
     CLOSE_ANGLE_BRACES = 296,
     OPEN_SQUARE_BRACES = 297,
@@ -136,10 +136,10 @@ extern int yydebug;
 #define ADDRESS 288
 #define LENGTH 289
 #define SEMICOLON 290
-#define COLON 291
-#define COMMA 292
-#define OPEN_CURLY_BRACES 293
-#define CLOSE_CURLY_BRACES 294
+#define COMMA 291
+#define OPEN_CURLY_BRACES 292
+#define CLOSE_CURLY_BRACES 293
+#define COLON 294
 #define OPEN_ANGLE_BRACES 295
 #define CLOSE_ANGLE_BRACES 296
 #define OPEN_SQUARE_BRACES 297
@@ -159,7 +159,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 115 "parser.y"
+#line 125 "parser.y"
 
 	struct node *node;
 	struct node2 *node2;

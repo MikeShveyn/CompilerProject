@@ -7,9 +7,9 @@
 	int yylex();
 	void yyerror(const char* msg);
 	int yywrap();
-	FILE * f1;
+	
 
-
+	/* Tree and semantyc */
 	typedef struct node
 	{	
 		char *token;
@@ -27,63 +27,18 @@
 	struct node *head;
 	node *mknode(char *token, node *left, node*right);
 	node2 *mknode2(char *token, node *left, node*right,char *);
+
+	/* Print Tree  */
 	void TreePrint(node *tree);
 	void CalcShift(int t); 
+
 	char *func_name=NULL;
 	int shift = 0;
 	int ret_flag = 0;	
 	int ret_val_flag=0;
-	int flag = 0;
-	int mulltipleMain = 0;
-	/*  Semantic  */
-	void freeStack();
-	void add(char);
-    void insert_type();
-    int search(char *);
-	 void check_declaration(char *);
-	 int searchForDeclaration(char *type);
-	void check_return_type(const char *);
-	int check_types(char *, char *);
-	char *get_type(const char *, int is_func);
-	void set_current_scope(const char *, int is_func);
-	void add_to_param_count();
-	void set_param_count(const char * name);
-	void check_param_list();
-	void add_to_current_param_list();
-	void endScope();
-	char* check_alg_expr(char * type1, char * type2, char * op);
-	void check_declaration_type(char *type1, char *type2);
-	void func_start();
-	void func_end();
-	void while_start();
-	void while_end();
-	void while_rep();
-	void for_start();
-	void for_inter();
-	void for_rep();
-	void logical_gen();
-	void algebric_gen();
-	void codegen_assign();
-	void push();
-	void if_label1();
-	void if_label2();
-	void if_label3();
-	void func_call_gen();
-	int sem_errors=0;
-	int param_count_current = 0;
-	int current_param_list = 0;
-	char buff[100];
-	char errors[10][100];
-	char reserved[10][10] = {"int", "real", "char", "void", "if", "else", "for", "while", "main", "return"};
-	int label[200];
-	int lnum=0;
-	int ltop=0;
-	int stop=0;
-	int top=0;
-	char st[1000][10];
-	char temp_var[2]="t";
-	int ind=0;
+	
 
+	/*  Semantic  */
 	struct dataType {
         char * id_name;
         char * data_type;
@@ -108,7 +63,62 @@
     int q;
     int count_line = 0;
 	char type[10];
+	int flag = 0;
+	int mulltipleMain = 0;
+	int sem_errors=0;
+	int param_count_current = 0;
+	int current_param_list = 0;
+	char errors[10][100];
+	char reserved[10][10] = {"int", "real", "char", "void", "if", "else", "for", "while", "main", "return"};
 
+	void freeStack();
+	void add(char);
+    void insert_type();
+	int search(char *);
+	void check_declaration(char *);
+	int searchForDeclaration(char *type);
+	void check_return_type(const char *);
+	int check_types(char *, char *);
+	char *get_type(const char *, int is_func);
+	void set_current_scope(const char *, int is_func);
+	void add_to_param_count();
+	void set_param_count(const char * name);
+	void check_param_list();
+	void add_to_current_param_list();
+	void endScope();
+
+
+	/* TAC */
+	char buff[100];
+	int label[200];
+	int lnum=0;
+	int ltop=0;
+	int stop=0;
+	int top=0;
+	char st[1000][10];
+	char temp_var[4]="t";
+	int ind=0;
+	FILE * f1;
+	int function_call_tac = 0;
+
+	char* check_alg_expr(char * type1, char * type2, char * op, char* operator);
+	void check_declaration_type(char *type1, char *type2);
+	void func_start();
+	void func_end();
+	void while_start();
+	void while_end();
+	void while_rep();
+	void for_start();
+	void for_inter();
+	void for_rep();
+	void logical_gen(char * op);
+	void algebric_gen(char * op);
+	void codegen_assign();
+	void push(char * str);
+	void if_label_start();
+	void if_label_rep();
+	void if_label_else();
+	void func_call_gen();
 %}
 
 %union
@@ -124,9 +134,9 @@
 // STATMENTS
 %token<str> IF ELSE DO WHILE FOR VAR RETURN
 // OPERATORS
-%token<str> AND DIVISION ASSIGNMENT EQL GREATER GREATER_EQL LESS LESS_EQL MINUS NOT NOT_EQL OR PLUS MULTIPLY ADDRESS
+%token<str> AND DIVISION ASSIGNMENT EQL GREATER GREATER_EQL LESS LESS_EQL MINUS NOT NOT_EQL OR PLUS MULTIPLY ADDRESS 
 // SYNTAX
-%token<str> LENGTH SEMICOLON COLON COMMA OPEN_CURLY_BRACES CLOSE_CURLY_BRACES OPEN_ANGLE_BRACES CLOSE_ANGLE_BRACES OPEN_SQUARE_BRACES CLOSE_SQUARE_BRACES
+%token<str> LENGTH SEMICOLON COMMA OPEN_CURLY_BRACES CLOSE_CURLY_BRACES COLON OPEN_ANGLE_BRACES CLOSE_ANGLE_BRACES OPEN_SQUARE_BRACES CLOSE_SQUARE_BRACES
 // LITERALS
 %token<str> COMMENT NONE BOOL_TRUE BOOL_FALSE  CHAR_LITERAL STRING_LITERAL DECIMAL_LITERAL HEX_LITERAL REAL_LITERAL  VARIABLE_ID 
 
@@ -218,7 +228,7 @@ statment_func:
 	   | {add('B');}code_block { $$=mknode("",$2,NULL);}
 	   ;
 
-function_call: function_lhs { func_call_gen();} OPEN_ANGLE_BRACES function_call_params  CLOSE_ANGLE_BRACES  {check_param_list();  $$=mknode2("FUNCTION_CALL",$1->node,$4, $1->type);};
+function_call: function_lhs  OPEN_ANGLE_BRACES function_call_params  CLOSE_ANGLE_BRACES  { func_call_gen(); check_param_list();  $$=mknode2("FUNCTION_CALL",$1->node,$3, $1->type);};
 
 
 function_call_params :
@@ -228,8 +238,8 @@ function_call_params :
 		;
 
 function_lhs:
-	   VARIABLE_ID  {push(); check_declaration($1); set_param_count($1); $$=mknode2($1,NULL,NULL, get_type($1, 1));}
-	 | VARIABLE_ID {push(); check_declaration($1); set_param_count($1); }  OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode2($1,$4->node,NULL, get_type($1, 1));}
+	   VARIABLE_ID  {push($1); check_declaration($1); set_param_count($1); $$=mknode2($1,NULL,NULL, get_type($1, 1));}
+	 | VARIABLE_ID {push($1); check_declaration($1); set_param_count($1); }  OPEN_SQUARE_BRACES exp CLOSE_SQUARE_BRACES {$$=mknode2($1,$4->node,NULL, get_type($1, 1));}
 	 ;
 
 
@@ -292,39 +302,41 @@ statment:
 code_block: OPEN_CURLY_BRACES body CLOSE_CURLY_BRACES {endScope(); $$=mknode("CODE_BLOCK",$2,NULL);};
 
 conditions: 
-	  OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block  {$$=mknode("IF",$2->node,$4);}
-	| OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block ELSE {add('K');} code_block {if_label3(); $$=mknode("IF-ELSE", mknode("",$2->node,$4), mknode("",$7,NULL));}
-	|{if_label3();}
+	  OPEN_ANGLE_BRACES args_cond CLOSE_ANGLE_BRACES code_block  {if_label_rep(); $$=mknode("IF",$2->node,$4);}
+	| OPEN_ANGLE_BRACES  args_cond CLOSE_ANGLE_BRACES code_block ELSE {if_label_rep(); add('K');} code_block {if_label_else(); $$=mknode("IF-ELSE", mknode("",$2->node,$4), mknode("",$7,NULL));}
+	|{if_label_else();}
 	;
 
 loops:
-	  WHILE {add('K');} OPEN_ANGLE_BRACES args_cond {while_rep();} CLOSE_ANGLE_BRACES code_block {  $$=mknode("WHILE",$4->node,$7); while_end();}
+	  WHILE {add('K');} OPEN_ANGLE_BRACES {while_start();} args_cond {while_rep();} CLOSE_ANGLE_BRACES code_block {  $$=mknode("WHILE",$5->node,$8); while_end();}
 	| DO {add('K');} code_block WHILE  OPEN_ANGLE_BRACES args_cond {while_rep();} CLOSE_ANGLE_BRACES SEMICOLON{  $$=mknode("DO-WHILE",$3,$6->node); while_end();}
 	| FOR {add('K');} OPEN_ANGLE_BRACES init SEMICOLON {for_inter();} args_cond  SEMICOLON {for_rep();} update  CLOSE_ANGLE_BRACES code_block { $$=mknode("FOR",mknode("INIT", $4, mknode("COND", $7->node, mknode("UPDATE",$10, NULL))),$12);}
 	;  
 
 args_cond : 
-	 exp EQL exp {$$=mknode2("==",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log2"));}							
-	| exp NOT_EQL exp {$$=mknode2("!=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log2"));}							
-	| exp LESS exp {$$=mknode2("<",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3"));}									
-	| exp LESS_EQL exp {$$=mknode2("<=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3"));}								
-	| exp GREATER  exp {$$=mknode2(">",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3"));}								
-	| exp GREATER_EQL exp {$$=mknode2(">=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3"));}
-    | exp OR exp {$$=mknode2("||",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log"));}
-	| exp AND  exp {$$=mknode2("&&",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log"));}														
-	| NOT  exp  {$$=mknode2("!",$2->node,NULL, $2->type);} 
+	 exp EQL exp {$$=mknode2("==",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log2", "=="));}							
+	| exp NOT_EQL exp {$$=mknode2("!=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log2", "!="));}							
+	| exp LESS exp {$$=mknode2("<",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3", "<"));}									
+	| exp LESS_EQL exp {$$=mknode2("<=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3", "<="));}								
+	| exp GREATER  exp {$$=mknode2(">",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3", ">"));}								
+	| exp GREATER_EQL exp {$$=mknode2(">=",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log3", ">="));}
+    | exp OR exp {$$=mknode2("||",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log", "||"));}
+	| exp AND  exp {$$=mknode2("&&",$1->node,$3->node, check_alg_expr($1->type, $3->type, "log", "&&"));}														
+	|NOT exp {$$=mknode2("!",$2->node,NULL, check_alg_expr("NONE", $2->type, "not", "!"));} 
+	;
 
-assignment_statement: lhs {push();} ASSIGNMENT expressions {codegen_assign();} SEMICOLON {check_declaration_type($1->type, $4->type); $$=mknode("=",$1->node,$4->node); };
+
+assignment_statement: lhs  ASSIGNMENT expressions {codegen_assign();} SEMICOLON {check_declaration_type($1->type, $3->type); $$=mknode("=",$1->node,$3->node); };
 
 lhs:
-	   VARIABLE_ID  {check_declaration($1); $$=mknode2($1,NULL,NULL, get_type($1, 0));}
-	 | VARIABLE_ID {check_declaration($1);} OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES {$$=mknode2($1,$4,NULL, get_type($1, 0));}
-	 | MULTIPLY VARIABLE_ID  {check_declaration($2); $$=mknode2($2,NULL,NULL, get_type($2, 3));}
+	   VARIABLE_ID  {push($1); check_declaration($1); $$=mknode2($1,NULL,NULL, get_type($1, 0));}
+	 | VARIABLE_ID {push($1); check_declaration($1);} OPEN_SQUARE_BRACES string_exp CLOSE_SQUARE_BRACES {$$=mknode2($1,$4,NULL, get_type($1, 0));}
+	 | MULTIPLY VARIABLE_ID  {push($1); check_declaration($2); $$=mknode2($2,NULL,NULL, get_type($2, 3));}
 	 ;
 
-init:  lhs ASSIGNMENT {push();} integer_literal { $$=mknode("=",$1->node,$4);};
+init:  lhs ASSIGNMENT {push($2);} integer_literal { $$=mknode("=",$1->node,$4);};
 	
-update: lhs ASSIGNMENT {push();} exp {$$=mknode("=",$1->node,$4->node);};
+update: lhs ASSIGNMENT {push($2);} exp {$$=mknode("=",$1->node,$4->node);};
 
 return: RETURN exp SEMICOLON {check_return_type($2->type); $$=mknode("RET-VAL",$2->node,NULL);} ;
 
@@ -338,20 +350,20 @@ expressions:
  ;
 
 exp: 
-	  exp PLUS {push();} exp {$$=mknode2("+",$1->node,$4->node, check_alg_expr($1->type, $4->type, "alg"));}         			
-	| exp MINUS {push();} exp {$$=mknode2("-",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "alg"));}              				
-	| exp MULTIPLY {push();} exp {$$=mknode2("*",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "alg"));}								
-	| exp DIVISION {push();} exp {$$=mknode2("/",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "alg"));}															
-	| exp EQL {push();} exp  {$$=mknode2("==",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "log2"));}							
-	| exp NOT_EQL {push();} exp {$$=mknode2("!=",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "log2"));}							
-	| exp LESS {push();} exp {$$=mknode2("<",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "log3"));}									
-	| exp LESS_EQL {push();} exp {$$=mknode2("<=",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "log3"));}								
-	| exp GREATER {push();} exp {$$=mknode2(">",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "log3"));}								
-	| exp GREATER_EQL {push();} exp {$$=mknode2(">=",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "log3"));}
-    | exp OR {push();} exp {$$=mknode2("||",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "log"));}
-	| exp AND {push();} exp {$$=mknode2("&&",$1->node,$4->node,  check_alg_expr($1->type, $4->type, "log"));}												
-	| NOT {push();} exp {$$=mknode2("!",$3->node,NULL, check_alg_expr("NONE", $3->type, "not"));} 								
-	| VARIABLE_ID {push(); check_declaration($1);  $$=mknode2($1,NULL,NULL, get_type($1, 0));}	  
+	  exp PLUS  exp {$$=mknode2("+",$1->node,$3->node, check_alg_expr($1->type, $3->type, "alg",  "+"));}         			
+	| exp MINUS exp {$$=mknode2("-",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "alg", "-"));}              				
+	| exp MULTIPLY  exp {$$=mknode2("*",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "alg", "*"));}								
+	| exp DIVISION  exp {$$=mknode2("/",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "alg", "/"));}															
+	| exp EQL  exp  {$$=mknode2("==",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log2", "=="));}							
+	| exp NOT_EQL  exp {$$=mknode2("!=",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log2","!=" ));}							
+	| exp LESS  exp {$$=mknode2("<",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log3", "<="));}									
+	| exp LESS_EQL  exp {$$=mknode2("<=",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log3",">"));}								
+	| exp GREATER  exp {$$=mknode2(">",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log3", ">"));}								
+	| exp GREATER_EQL  exp {$$=mknode2(">=",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log3", ">="));}
+    | exp OR  exp {$$=mknode2("||",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log", "||"));}
+	| exp AND  exp {$$=mknode2("&&",$1->node,$3->node,  check_alg_expr($1->type, $3->type, "log", "&&"));}												
+	| NOT exp {$$=mknode2("!",$2->node,NULL, check_alg_expr("NONE", $2->type, "not", "!"));} 								
+	| VARIABLE_ID {push($1); check_declaration($1);  $$=mknode2($1,NULL,NULL, get_type($1, 0));}	  
 	| primitiveType {$$=mknode2("",$1->node, NULL, $1->type);} 											
 	| function_call { $$=mknode2("function_call",$1->node,NULL, $1->type);}	  							
 	| LENGTH VARIABLE_ID LENGTH {$$=mknode2($2,NULL,NULL, "INT");}	 									
@@ -362,12 +374,12 @@ exp:
 	;
 
 string_exp:
-	  string_exp PLUS {push();} string_exp {$$=mknode("+",$1,$4);}         			
-	| string_exp MINUS {push();} string_exp {$$=mknode("-",$1,$4);}              				
-	| string_exp MULTIPLY {push();} string_exp {$$=mknode("*",$1,$4);}								
-	| string_exp DIVISION {push();} string_exp {$$=mknode("/",$1,$4);}	
+	  string_exp PLUS {push($2);} string_exp {$$=mknode("+",$1,$4);}         			
+	| string_exp MINUS {push($2);} string_exp {$$=mknode("-",$1,$4);}              				
+	| string_exp MULTIPLY {push($2);} string_exp {$$=mknode("*",$1,$4);}								
+	| string_exp DIVISION {push($2);} string_exp {$$=mknode("/",$1,$4);}	
 	| integer_literal {$$=mknode("",$1,NULL);}  
-	| VARIABLE_ID  	{{push();} $$=mknode($1,NULL,NULL);}  
+	| VARIABLE_ID  	{{push($1);} $$=mknode($1,NULL,NULL);}  
 	;
 
  /* TYPES */
@@ -385,57 +397,57 @@ type:
 primitiveType: 
 	 NONE 
 	 {	
-		 push();
+		 push($1);
 		 $$=mknode2("None",NULL,NULL, "None");
 		  add('C');
 	 } 
 	 |BOOL_TRUE 
 	 {	
-		 push();
+		 push($1);
 		 $$=mknode2("True",NULL,NULL, "BOOL");
 		 add('C');
 	  } 
 	 |BOOL_FALSE 
 	  {
-		  push();
+		  push($1);
 		 $$=mknode2("False",NULL,NULL, "BOOL"); 
 		 add('C'); 
 	  } 
 	 | CHAR_LITERAL 
 	 {
-		 push();
+		 push($1);
 		 $$=mknode2($1,NULL,NULL, "CHAR");
 		  add('C');
 	 } 
 	 | DECIMAL_LITERAL  
 	 {
-		 push();
+		 push($1);
 		$$=mknode2($1,NULL,NULL, "INT"); 
 		add('C');
 	 } 
 	 | HEX_LITERAL 
 	 {
-		 push();
+		 push($1);
 		 $$=mknode2($1,NULL,NULL, "REAL");
 		  add('C');
 	 } 
 	 | REAL_LITERAL  
 	 {
-		 push();
+		 push($1);
 		 $$=mknode2($1,NULL,NULL, "REAL");
 		  add('C');
 	 } 
 	 | STRING_LITERAL 
 	 {
-		 push();
+		 push($1);
 		 $$=mknode2($1,NULL,NULL, "STR");
 		  add('C');
 	 } 
 	 ;
 
 integer_literal:
-	   DECIMAL_LITERAL  { push();$$=mknode($1,NULL,NULL); add('C');} 
-	 | HEX_LITERAL { push();$$=mknode($1,NULL,NULL); add('C');} 
+	   DECIMAL_LITERAL  { push($1);$$=mknode($1,NULL,NULL); add('C');} 
+	 | HEX_LITERAL { push($1);$$=mknode($1,NULL,NULL); add('C');} 
 	 ;
 
 nothing:  {$$=NULL;}; 
@@ -443,8 +455,7 @@ nothing:  {$$=NULL;};
 %%
 
 int main() {
-	set_current_scope("global", 0);
-    
+   set_current_scope("global", 0);
    f1=fopen("output","w");
    if(!yyparse())
 		printf("\nParsing complete\n");
@@ -502,6 +513,148 @@ int main() {
 	//freeStack();
 }
 
+/*TAC Section start*/
+void func_start() {
+	fprintf(f1,"%s:\n\tBeginFunc\n", yytext); 
+}
+
+void func_end() {
+	fprintf(f1,"\tEndFunc\n"); 
+}
+
+void while_start() {
+	lnum++;
+	label[++ltop]=lnum;
+	fprintf(f1,"L%d:",lnum);
+	lnum++;
+ 	fprintf(f1,"\tif( not ");
+}
+
+void while_end() {
+	int x,y;	
+	y=label[ltop--];
+	x=label[ltop--];
+	fprintf(f1,"\tgoto L%d\n",x);
+	fprintf(f1,"L%d:",y);
+	top--;
+}
+
+void while_rep()
+{
+	
+ 	fprintf(f1,")\tgoto L%d\n",lnum);
+ 	label[++ltop]=lnum;
+}
+
+void for_start()
+{
+	lnum++;
+	fprintf(f1,"L%d:",lnum);
+}
+
+void for_inter()
+{
+	lnum++;
+	label[++ltop]=lnum;
+	fprintf(f1,"L%d:",lnum);
+}
+
+void for_rep()
+{
+	lnum++;
+ 	fprintf(f1,"\tif( not %s)",st[top]);
+ 	fprintf(f1,"\tgoto L%d\n",lnum);
+ 	label[++ltop]=lnum;
+}
+
+void if_label_start()
+{
+ 	lnum++;
+ 	fprintf(f1,"\tif( not");
+ 	
+}
+
+void if_label_rep()
+{	
+	fprintf(f1,"\tgoto L%d\n",lnum);
+ 	label[++ltop]=lnum;
+	int x;
+	lnum++;
+	x=label[ltop--]; 
+	fprintf(f1,"\tgoto L%d\n",lnum);
+	fprintf(f1,"L%d:",x); 
+	label[++ltop]=lnum;
+}
+
+void if_label_else()
+{
+	int y;
+	y=label[ltop--];
+	fprintf(f1,"L%d:",y);
+	top--;
+}
+
+void push(char * str)
+{	
+	printf("inPush Top %d StackTop %s YYTEXT %s\n", top, st[top], str);
+  	strcpy(st[++top],str);
+}
+
+
+void func_call_gen() {
+	function_call_tac = 1;
+	ind = 0;
+	sprintf(temp_var,"t%d",ind); 
+	fprintf(f1,"\t%s=%s\n",temp_var,st[top]);
+	fprintf(f1,"\tPushParam %s: \n",temp_var);
+	ind++;
+	top--;
+	sprintf(temp_var,"t%d",ind); 
+	fprintf(f1,"\t%s = LCall %s: \n", temp_var,st[top]);
+	top--;
+	fprintf(f1,"\tPopParams %d: \n",4);
+
+}
+
+void logical_gen(char * op)
+{
+	function_call_tac = 1;
+ 	sprintf(temp_var,"t%d",ind);
+  	fprintf(f1,"%s%s%s",st[top-1],op,st[top]);
+  	top-=2;
+ 	strcpy(st[top],temp_var);
+ 	ind++;
+}
+
+void algebric_gen(char * op)
+{
+	function_call_tac = 1;
+	ind++;	
+ 	sprintf(temp_var,"t%d",ind);
+  	fprintf(f1,"\t%s=%s%s%s\n",temp_var,st[top-1],op,st[top]);
+  	top-=2;
+ 	strcpy(st[top],temp_var);
+ 	ind++;
+}
+
+void codegen_assign()
+{
+		printf("inCode assign %d %s %s\n", top, st[top], st[top-1]);
+		sprintf(temp_var,"t%d",ind);
+	if(function_call_tac == 0){
+		fprintf(f1,"\t%s=%s\n",temp_var,st[top]);
+		fprintf(f1,"\t%s=%s\n",st[top-1],temp_var);
+		top-=2;
+	}else{
+		fprintf(f1,"\t%s=%s\n",st[top],temp_var);
+		function_call_tac = 0;
+		top-=1;
+	}
+	
+}
+/*3 Section end*/
+
+/* SEMANTIC START  */
 int search(char *type) {
 	int i;
 	for(i=count_symbol_table_line-1; i>=0; i--) {
@@ -537,129 +690,6 @@ int searchForDeclaration(char *type) {
 	return flag;
 }
 
-/*3 Section start*/
-void func_start() {
-	fprintf(f1,"%s:\n\tBeginFunc\n", yytext); 
-}
-
-void func_end() {
-	fprintf(f1,"\tEndFunc\n"); 
-}
-
-void while_start() {
-	lnum++;
-	label[++ltop]=lnum;
-	fprintf(f1,"L%d:",lnum);
-}
-
-void while_end() {
-	int x,y;	
-	y=label[ltop--];
-	x=label[ltop--];
-	fprintf(f1,"\tgoto L%d\n",x);
-	fprintf(f1,"L%d:",y);
-	top--;
-}
-
-void while_rep()
-{
-	lnum++;
- 	fprintf(f1,"\tif( not %s)",st[top]);
- 	fprintf(f1,"\tgoto L%d\n",lnum);
- 	label[++ltop]=lnum;
-}
-
-void for_start()
-{
-	lnum++;
-	fprintf(f1,"L%d:",lnum);
-}
-
-void for_inter()
-{
-	lnum++;
-	label[++ltop]=lnum;
-	fprintf(f1,"L%d:",lnum);
-}
-
-void for_rep()
-{
-	lnum++;
- 	fprintf(f1,"\tif( not %s)",st[top]);
- 	fprintf(f1,"\tgoto L%d\n",lnum);
- 	label[++ltop]=lnum;
-}
-
-void if_label1()
-{
- 	lnum++;
- 	fprintf(f1,"\tif( not %s)",st[top]);
- 	fprintf(f1,"\tgoto L%d\n",lnum);
- 	label[++ltop]=lnum;
-}
-
-void if_label2()
-{
-	int x;
-	lnum++;
-	x=label[ltop--]; 
-	fprintf(f1,"\tgoto L%d\n",lnum);
-	fprintf(f1,"L%d:",x); 
-	label[++ltop]=lnum;
-}
-
-void if_label3()
-{
-	int y;
-	y=label[ltop--];
-	fprintf(f1,"L%d:",y);
-	top--;
-}
-
-void push()
-{	
-
-  	strcpy(st[++top],yytext);
-}
-
-
-void func_call_gen() {
-	ind = 0;
-	sprintf(temp_var,"t%d",ind); 
-	fprintf(f1,"\tPushParam %s: \n",temp_var);
-	ind++;
-	sprintf(temp_var,"t%d",ind); 
-	ind++;
-	fprintf(f1,"\t%s %s LCall %s: \n", temp_var,st[top-1],st[top]);
-	fprintf(f1,"\tPopParams %d: \n",4);
-}
-
-void logical_gen()
-{
- 	sprintf(temp_var,"t%d",ind);
-  	fprintf(f1,"\t%s%s%s%s\n",temp_var,st[top-2],st[top-1],st[top]);
-  	top-=2;
- 	strcpy(st[top],temp_var);
- 	ind++;
-}
-
-void algebric_gen()
-{
- 	sprintf(temp_var,"t%d",ind); // converts temp to reqd format
-  	fprintf(f1,"\t%s=%s%s%s\n",temp_var,st[top-2],st[top-1],st[top]);
-  	top-=2;
- 	strcpy(st[top],temp_var);
- 	ind++;
-}
-
-void codegen_assign()
-{
-	sprintf(temp_var,"t%d",ind);
-	fprintf(f1,"\t%s=%s\n",temp_var,st[top]);
- 	fprintf(f1,"\t%s=%s\n",st[top-1],temp_var);
- 	top-=2;
-}
-/*3 Section end*/
 void check_declaration(char *c) {
     q = searchForDeclaration(c);
     if(!q) {
@@ -678,7 +708,6 @@ void check_return_type(const char *value) {
 
 
 char *get_type(const char *var, int is_func){
-		printf("Check %s %d\n", var, is_func);
 		for(int j = 0; j <= count_scope_stack_elements; j++){
 		int temp = scopeStack[j].last_index;
 			for(int i=0; i < temp; i++) {
@@ -711,7 +740,6 @@ char *get_type(const char *var, int is_func){
 						}
 					}
 					else{
-						printf("Int return\n");
 						return scopeStack[j].symbol_table[i].data_type;
 					}
 				}
@@ -746,30 +774,28 @@ int check_types(char *type1, char *type2){
 	return 10;
 }
 
-char* check_alg_expr(char * type1, char * type2, char * op) {
-	printf("Check Alg exp %s %s %s\n", type1, type2, op);
+char* check_alg_expr(char * type1, char * type2, char * op, char * operator) {
 	int temp = check_types(type1, type2);
-	printf("%d\n", temp);
 	if(strcmp(op, "alg") == 0){
-		algebric_gen();
+		algebric_gen(operator);
 		if( temp == 7)
 			return "INT";
 		else if(temp == 1 || temp == 2 || temp == 8)
 			return "REAL";
 	}else if(strcmp(op, "log")== 0){
-		logical_gen();
+		logical_gen(operator);
 		if(temp == 9)
 			return "BOOL";	
 	}else if(strcmp(op, "log3")== 0){
-		logical_gen();
+		logical_gen(operator);
 		if(temp == 1 || temp == 2 || temp==7 || temp == 8)
 			return "BOOL";	
 	}else if(strcmp(op, "log2")== 0){
-		logical_gen();
+		logical_gen(operator);
 		if(strcmp(type1, type2)==0)
 			return "BOOL";	
 	}else if(strcmp(op, "not")== 0){
-		logical_gen();
+		logical_gen(operator);
 		if(strcmp(type2,"BOOL")==0)
 			return "BOOL";
 	}else{
@@ -783,7 +809,6 @@ char* check_alg_expr(char * type1, char * type2, char * op) {
 
 
 void check_declaration_type(char *type1, char *type2) {
-	printf("Check decl types %s %s\n", type1, type2);
 	int temp = check_types(type1, type2);
 
 	if(strcmp(type1, type2) !=0  && temp != -1 ){
@@ -807,20 +832,12 @@ void add(char c) {
 	if(!q) {
 		if(c == 'K') {
 
-			if(strcmp(yytext, "while")==0 || strcmp(yytext, "do")==0) {
-				while_start();
+			if(strcmp(yytext, "for")==0) {
+				for_start();
 			}
 
 			if(strcmp(yytext, "if")==0) {
-				if_label1();
-			}
-
-			if(strcmp(yytext, "else")==0) {
-				if_label2();
-			}
-
-			if(strcmp(yytext, "for")==0) {
-				for_start();
+				if_label_start(); 
 			}
 
 			scopeStack[current_scope_stack_top].symbol_table[count_symbol_table_line].id_name=strdup(yytext);
@@ -954,31 +971,15 @@ void endScope() {
 }
 
 
+/* SEMANTIC END  */
 
-void yyerror(const char* msg) {
-    fprintf(stderr, "%s\n", msg);
-}
 
-void freeStack() {
- int i,j = 0;	
- for(j = 0; i < count_scope_stack_elements; i++){
-	 for(i=0; i < count_symbol_table_line;i++) {
-		free(scopeStack[j].symbol_table[i].id_name);
-		free(scopeStack[j].symbol_table[i].type);
-		free(scopeStack[j].symbol_table[i].data_type);
-	}
-	free(scopeStack[j].scope_name);
- }		
-}
-
-/* AST  */
+/* AST  START*/
 void CalcShift(int t) {
 	for(int i= 0; i < t; i++){
 		printf("	");
 	}
 }
-
-
 
 void TreePrint(node* tree){
 	if(strcmp(tree->token, "FUNC") == 0){
@@ -1097,6 +1098,8 @@ void TreePrint(node* tree){
 
 }
 
+/* AST END  */
+
 node *mknode(char *token,node *left,node *right)
 {
 	node *newnode = (node*)malloc(sizeof(node));
@@ -1119,3 +1122,18 @@ node2 *mknode2(char *token, node *left, node*right, char * type) {
 	return newnode;
 }
 
+void yyerror(const char* msg) {
+    fprintf(stderr, "%s\n", msg);
+}
+
+void freeStack() {
+ int i,j = 0;	
+ for(j = 0; i < count_scope_stack_elements; i++){
+	 for(i=0; i < count_symbol_table_line;i++) {
+		free(scopeStack[j].symbol_table[i].id_name);
+		free(scopeStack[j].symbol_table[i].type);
+		free(scopeStack[j].symbol_table[i].data_type);
+	}
+	free(scopeStack[j].scope_name);
+ }		
+}
